@@ -141,14 +141,17 @@ public:
 
 	bool deathSoundPlayed = false;
 };
+//TODO: each ai type has a different sprite allowing players to distinguish them
+//TODO: make it so ghosts cant bump into each other
+//TODO: Implement all sounds
+//TODO: Eat ghosts power for 5 seconds, this causes them to run to the exit and then respawn 10 seconds later with a new ai type
 //TODO: Implement multiple lives
 //TODO: Add in different ghost sprites and animations for them
 //TODO: add game over screen
 //TODO: reload the game when all munchies have been picked up
 //TODO: Add in powerup munchies
-//TODO: Add in a load level system
-//TOOD: Create tiles for the level
-//TODO: Piece together map for the level
 //TODO: Add in ghost AI
-//TODO: Research ai path finding algorithms
 //TODO: make cherry spawn after random amount of time
+//TODO: Add in highscore functionality
+//TOOD: Different munchies
+//TODO: Add in a high score leader board

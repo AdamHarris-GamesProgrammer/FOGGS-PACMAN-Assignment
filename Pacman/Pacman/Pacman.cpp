@@ -79,7 +79,7 @@ void Pacman::LoadContent()
 	ghostTexture = rl.LoadTexture("Assets/Textures/GhostBlue.png");
 	for (auto & ghost : ghosts)
 	{
-		ghost = new Enemy(ghostTexture, GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20));
+		ghost = new Enemy(ghostTexture, GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
 		gameObjects.push_back(ghost);
 	}
 

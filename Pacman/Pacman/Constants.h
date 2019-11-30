@@ -3,7 +3,7 @@
 #define SCREEN_WIDTH	S2D::Graphics::GetViewportWidth()
 #define SCREEN_HEIGHT	S2D::Graphics::GetViewportHeight()
 #define PREFFERRED_FPS	60
-#define MUNCHIE_COUNT	50
+#define MUNCHIE_COUNT	100
 
 #define GHOSTCOUNT	4
 

@@ -76,14 +76,14 @@ void Pacman::LoadContent()
 	ghostTexture = rl.LoadTexture("Assets/Textures/GhostSheet.png");
 	for (auto & ghost : ghosts)
 	{
-		ghost = new Enemy(ghostTexture, GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
+		ghost = new Enemy(ghostTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
 		gameObjects.push_back(ghost);
 	}
 
 	munchieTexture = rl.LoadTexture("Assets/Textures/Munchie.png");
 	// Load Munchie
 	for (int i = 0; i < MUNCHIE_COUNT; i++) {
-		munchies[i] = new Munchies(munchieTexture, GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 8, 8));
+		munchies[i] = new Munchies(munchieTexture, co.GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 8, 8));
 	}
 	gameObjects.push_back(pacman);
 	gameObjects.push_back(cherry);
@@ -141,7 +141,7 @@ void Pacman::Update(int elapsedTime)
 				object->Update(elapsedTime, frameCount);
 			}
 			if (!pacman->invincible)
-				CheckGhostCollisions();
+				//CheckGhostCollisions();
 			CheckMunchieCollisions();
 			CheckCherryCollisions();
 		}
@@ -154,7 +154,6 @@ void Pacman::Draw(int elapsedTime)
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	SpriteBatch::Draw(playspaceTexture, new Vector2(32, 32), new Rect(0.0f, 0.0f, 960, 704));
 	if (isGameStarted) {
-		//SpriteBatch::Draw(playspaceTexture, new Rect(32.0f,32.0f,960,704));
 		for each (GameObject * object in gameObjects)
 		{
 			if(object != pacman)
@@ -245,19 +244,7 @@ void Pacman::PollInput()
 	}
 }
 
-Vector2* Pacman::GeneratePositionWithinGameBounds()
-{
-	int randX = rand() % 992 + 48;
-	int randY = rand() % 736 + 48;
-	if (randX >= 960) {
-		randX -= 128;
-	}
-	if (randY >= 704) {
-		randY -= 96;
-	}
 
-	return new Vector2(randX, randY);
-}
 
 void Pacman::CheckGhostCollisions()
 {
@@ -293,7 +280,8 @@ void Pacman::CheckCherryCollisions()
 	if (cherry != nullptr) {
 		if (collisionInstance.CheckCollisions(pacman, cherry)) {
 			playerScore += 100;
-			cherry = nullptr;
+			cherry->SetPosition(new Vector2(1100, 1100));
+			cherry->SetTimer = true;
 		}
 	}
 }

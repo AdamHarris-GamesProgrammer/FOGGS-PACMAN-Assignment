@@ -4,6 +4,8 @@
 
 #include "S2D/S2D.h"
 #include "ResourceLoaders.h"
+#include "CommonOperations.h"
+#include "Constants.h"
 
 class GameObject {
 public:
@@ -28,6 +30,7 @@ protected:
 	S2D::Rect* mSrcRect;
 
 	ResourceLoaders rl;
+	CommonOperations co;
 };
 
 #endif

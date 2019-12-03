@@ -22,6 +22,7 @@
 #include "Collisions.h"
 #include <iostream>
 #include <fstream>
+#include "CommonOperations.h"
 
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
@@ -85,8 +86,6 @@ private:
 
 	Collisions collisionInstance;
 
-	//Texture2D* playspaceTexture;
-
 	//sound control bools
 	bool hasIntroMusicPlayed = false;
 	bool hasChompedSoundPlayed = false;
@@ -95,7 +94,7 @@ private:
 	std::fstream statsFile;
 
 private:
-	Vector2* GeneratePositionWithinGameBounds();
+
 	void CheckGhostCollisions();
 	void CheckMunchieCollisions();
 	void CheckCherryCollisions();
@@ -105,6 +104,8 @@ private:
 	void DeleteScore();
 
 	Texture2D* playspaceTexture;
+
+	CommonOperations co;
 
 
 public:
@@ -140,7 +141,6 @@ public:
 /* WEDNESDAY 
 Implement new munchies into game
 Program big munchie functionality (add additional AI type to enemy for running away from player)
-Implement cherry pickup collider and ability to spawn every 15 seconds
 make it so munchies cant overlap each other
 */
 

@@ -94,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="Cherry.h" />
     <ClInclude Include="Collisions.h" />
+    <ClInclude Include="CommonOperations.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameObject.h" />

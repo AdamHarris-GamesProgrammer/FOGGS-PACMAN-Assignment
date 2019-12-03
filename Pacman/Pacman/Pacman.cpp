@@ -55,9 +55,6 @@ Pacman::~Pacman()
 	delete uiSystem->pauseScreen->pauseScreenRectangle;
 	delete uiSystem->pauseScreen;
 
-	delete uiSystem->gameGUI->extraPacmanSprite;
-	delete uiSystem->gameGUI->extraPacmanSpritePosition;
-	delete uiSystem->gameGUI->extraPacmanSpriteRect;
 	delete uiSystem->gameGUI->highScoreStringPosition;
 	delete uiSystem->gameGUI->highScoreTitleStringPosition;
 	delete uiSystem->gameGUI->scoreStringPosition;
@@ -76,7 +73,7 @@ void Pacman::LoadContent()
 
 	cherry = new Cherry(rl.LoadTexture("Assets/Textures/Cherry.png"), new S2D::Vector2(300.0f, 300.0f), new S2D::Rect(0.0f, 0.0f, 32, 32));
 
-	ghostTexture = rl.LoadTexture("Assets/Textures/GhostBlue.png");
+	ghostTexture = rl.LoadTexture("Assets/Textures/GhostSheet.png");
 	for (auto & ghost : ghosts)
 	{
 		ghost = new Enemy(ghostTexture, GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
@@ -86,7 +83,7 @@ void Pacman::LoadContent()
 	munchieTexture = rl.LoadTexture("Assets/Textures/Munchie.png");
 	// Load Munchie
 	for (int i = 0; i < MUNCHIE_COUNT; i++) {
-		munchies[i] = new Munchies(munchieTexture, GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 12, 12));
+		munchies[i] = new Munchies(munchieTexture, GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 8, 8));
 	}
 	gameObjects.push_back(pacman);
 	gameObjects.push_back(cherry);
@@ -110,12 +107,6 @@ void Pacman::LoadContent()
 	uiSystem->gameGUI->highScoreStringPosition = new Vector2((SCREEN_WIDTH / 2), 32);
 	uiSystem->gameGUI->scoreStringPosition = new Vector2((SCREEN_WIDTH / 4), 32);
 
-	uiSystem->gameGUI->extraPacmanSprite = rl.LoadTexture("Assets/Textures/Pacman.tga");
-	uiSystem->gameGUI->extraPacmanSpritePosition = new Vector2(SCREEN_WIDTH / 4, SCREEN_HEIGHT - 32);
-	uiSystem->gameGUI->extraPacmanSpriteRect = new Rect(0.0f, 0.0f, 32, 32);
-	uiSystem->gameGUI->extraPacmanSpriteRect->Y = 64;
-	uiSystem->gameGUI->extraPacmanSpriteRect->X = 32;
-
 	playspaceTexture = rl.LoadTexture("Assets/Textures/Playspace.png");
 
 }
@@ -123,36 +114,39 @@ void Pacman::LoadContent()
 void Pacman::Update(int elapsedTime)
 {
 	PollInput();
+	if (!pacman->dead) {
+		if (!isPaused || !isGameStarted) {
+			frameCount++;
+		}
+		if (!isGameStarted || isPaused) {
+			if (!hasIntermissionSoundPlayed) {
+				Audio::Play(pacmanIntermissionSound);
+				hasIntermissionSoundPlayed = true;
+			}
+		}
+		else if (isGameStarted && !hasIntroMusicPlayed) {
+			Audio::Stop(pacmanIntermissionSound);
+			Audio::Play(pacmanBeginningSound);
+			hasIntroMusicPlayed = true;
+			hasIntermissionSoundPlayed = false;
+		}
+		if (isGameStarted && !isPaused) {
+			for (int i = 0; i < MUNCHIE_COUNT; i++) {
+				if (munchies[i] != nullptr)
+					munchies[i]->Update(elapsedTime, frameCount);
+			}
 
-	if (!isPaused || !isGameStarted) {
-		frameCount++;
-	}
-	if (!isGameStarted || isPaused) {
-		if (!hasIntermissionSoundPlayed) {
-			Audio::Play(pacmanIntermissionSound);
-			hasIntermissionSoundPlayed = true;
+			for each (GameObject * object in gameObjects)
+			{
+				object->Update(elapsedTime, frameCount);
+			}
+			if (!pacman->invincible)
+				CheckGhostCollisions();
+			CheckMunchieCollisions();
+			CheckCherryCollisions();
 		}
 	}
-	else if (isGameStarted && !hasIntroMusicPlayed) {
-		Audio::Stop(pacmanIntermissionSound);
-		Audio::Play(pacmanBeginningSound);
-		hasIntroMusicPlayed = true;
-		hasIntermissionSoundPlayed = false;
-	}
-	if (isGameStarted && !isPaused) {
-		for (int i = 0; i < MUNCHIE_COUNT; i++) {
-			if(munchies[i] != nullptr)
-				munchies[i]->Update(elapsedTime, frameCount);
-		}
 
-		for each (GameObject*  object in gameObjects)
-		{
-			object->Update(elapsedTime, frameCount);
-		}
-		if(!pacman->invincible)
-			CheckGhostCollisions();
-		CheckMunchieCollisions();
-	}
 }
 
 void Pacman::Draw(int elapsedTime)
@@ -218,10 +212,6 @@ void Pacman::DrawGUI() {
 	SpriteBatch::DrawString(highScoreTitleStream.str().c_str(), uiSystem->gameGUI->highScoreTitleStringPosition, Color::White);
 	SpriteBatch::DrawString(highScoreStream.str().c_str(), uiSystem->gameGUI->highScoreStringPosition, Color::White);
 	SpriteBatch::DrawString(scoreStream.str().c_str(), uiSystem->gameGUI->scoreStringPosition, Color::White);
-
-	SpriteBatch::Draw(uiSystem->gameGUI->extraPacmanSprite, uiSystem->gameGUI->extraPacmanSpritePosition, uiSystem->gameGUI->extraPacmanSpriteRect);
-	SpriteBatch::Draw(uiSystem->gameGUI->extraPacmanSprite, new Vector2(uiSystem->gameGUI->extraPacmanSpritePosition->X + 32, uiSystem->gameGUI->extraPacmanSpritePosition->Y), uiSystem->gameGUI->extraPacmanSpriteRect);
-
 }
 
 void Pacman::PollInput()
@@ -294,6 +284,17 @@ void Pacman::CheckMunchieCollisions()
 			}
 		}
 
+	}
+}
+
+
+void Pacman::CheckCherryCollisions()
+{
+	if (cherry != nullptr) {
+		if (collisionInstance.CheckCollisions(pacman, cherry)) {
+			playerScore += 100;
+			cherry = nullptr;
+		}
 	}
 }
 

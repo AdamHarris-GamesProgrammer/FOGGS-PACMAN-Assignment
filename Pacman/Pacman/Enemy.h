@@ -17,6 +17,8 @@ private:
 		Chase,
 		RandomDirection
 	};
+
+	void GenerateValues();
 public:
 	S2D::Vector2* mPosition;
 	S2D::Texture2D* mTexture;

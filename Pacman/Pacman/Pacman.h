@@ -23,11 +23,8 @@
 #include <iostream>
 #include <fstream>
 
-
-
 // Reduces the amount of typing by including all classes in S2D namespace
 using namespace S2D;
-
 
 struct PauseScreen {
 	//pause screen data
@@ -47,10 +44,6 @@ struct GameGUI {
 	Vector2* highScoreTitleStringPosition;
 	Vector2* highScoreStringPosition;
 	Vector2* scoreStringPosition;
-
-	Texture2D* extraPacmanSprite;
-	Vector2* extraPacmanSpritePosition;
-	Rect* extraPacmanSpriteRect;
 };
 
 struct UI {
@@ -105,6 +98,7 @@ private:
 	Vector2* GeneratePositionWithinGameBounds();
 	void CheckGhostCollisions();
 	void CheckMunchieCollisions();
+	void CheckCherryCollisions();
 
 	void SaveScore();
 	void LoadScore();
@@ -141,17 +135,25 @@ public:
 
 	bool deathSoundPlayed = false;
 };
-//TODO: each ai type has a different sprite allowing players to distinguish them
-//TODO: make it so ghosts cant bump into each other
-//TODO: Implement all sounds
-//TODO: Eat ghosts power for 5 seconds, this causes them to run to the exit and then respawn 10 seconds later with a new ai type
-//TODO: Implement multiple lives
-//TODO: Add in different ghost sprites and animations for them
-//TODO: add game over screen
-//TODO: reload the game when all munchies have been picked up
-//TODO: Add in powerup munchies
-//TODO: Add in ghost AI
-//TODO: make cherry spawn after random amount of time
-//TODO: Add in highscore functionality
-//TOOD: Different munchies
-//TODO: Add in a high score leader board
+
+
+/* WEDNESDAY 
+Implement new munchies into game
+Program big munchie functionality (add additional AI type to enemy for running away from player)
+Implement cherry pickup collider and ability to spawn every 15 seconds
+make it so munchies cant overlap each other
+*/
+
+/* Thursday
+Create all GUI screens (Level Fail, Level Win, How to play, highscore table)
+Implement these
+Add in game states enum to control this system
+Add in a reset and reload method for the game allowing a actual end and infitite replayability
+(maybe add a ghost each time the map is cleared
+*/
+
+/* FRIDAY
+Ghosts can bump into each other and bounce off one another
+Implement all sounds available
+Highscore system
+*/

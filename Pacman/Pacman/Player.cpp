@@ -45,7 +45,6 @@ void Player::PollInput()
 
 	// Gets the current state of the keyboard
 	S2D::Input::KeyboardState* keyboardState = S2D::Input::Keyboard::GetState();
-	S2D::Input::MouseState* mouseState = S2D::Input::Mouse::GetState();
 
 	//traditional pacman movement system
 	if (keyboardState->IsKeyDown(S2D::Input::Keys::W)) { //MOVE UP
@@ -102,7 +101,6 @@ void Player::Update(int elapsedTime, int frameCount)
 	}
 	if (invincible) {
 		invincibilityTimer -= 0.017;
-		std::cout << "Invincible" << " Time Left: " << invincibilityTimer << std::endl;
 		if (invincibilityTimer <= 0.0f)
 			invincible = false;
 	}

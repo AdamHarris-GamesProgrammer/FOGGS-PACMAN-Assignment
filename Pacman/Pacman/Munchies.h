@@ -16,7 +16,7 @@ public:
 		}
 		else
 		{
-			mSrcRect->X = 12;
+			mSrcRect->X = 8;
 		}
 	}
 };

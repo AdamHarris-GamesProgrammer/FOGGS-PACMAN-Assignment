@@ -154,7 +154,16 @@ void Pacman::Update(int elapsedTime)
 			CheckBigMunchieCollisions();
 		}
 	}
+	if (pacman->GetPowerUp()) {
+		powerUpMode = true;
 
+	}
+
+	if (powerUpMode && !pacman->GetPowerUp()) {
+		for (auto& ghost : ghosts) {
+			ghost->GenerateValues();
+		}
+	}
 }
 
 void Pacman::Draw(int elapsedTime)

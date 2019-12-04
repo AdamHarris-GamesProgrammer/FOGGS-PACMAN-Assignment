@@ -140,6 +140,7 @@ public:
 	bool ispKeyDown = false;
 
 	bool deathSoundPlayed = false;
+	bool powerUpMode = false;
 };
 
 

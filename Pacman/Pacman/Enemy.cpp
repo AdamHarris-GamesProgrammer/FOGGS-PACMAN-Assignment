@@ -29,6 +29,7 @@ void Enemy::GenerateValues()
 		break;
 
 	}
+	ScreenWrap();
 }
 
 void Enemy::ScreenWrap() {
@@ -98,8 +99,6 @@ void Enemy::Update(int elapsedTime, int frameCount)
 
 		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; }
 		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
-
-
 		
 		if (xDistanceToPlayer > yDistanceToPlayer) {
 			if (GetPosition()->X < mPlayer->GetPosition()->X) {
@@ -146,11 +145,12 @@ void Enemy::Update(int elapsedTime, int frameCount)
 	default:
 		break;
 	case RunAway:
-		if (GetPosition()->X < mPlayer->GetPosition()->X) { GetPosition()->X -= speed * elapsedTime; }
-		else if (GetPosition()->X > mPlayer->GetPosition()->X) { GetPosition()->X += speed * elapsedTime; }
+		if (GetPosition()->X < mPlayer->GetPosition()->X) { GetPosition()->X -= speed * elapsedTime; direction = 0; }
+		else if (GetPosition()->X > mPlayer->GetPosition()->X) { GetPosition()->X += speed * elapsedTime; direction = 1; }
 
-		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
-		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; }
+		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; direction = 3; }
+		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; direction = 2; }
+
 		break;
 	case Dead:
 		break;
@@ -159,8 +159,14 @@ void Enemy::Update(int elapsedTime, int frameCount)
 		ReverseDirection();
 	}
 	else {
-		ScreenWrap();
+		if (GetPosition()->X < SCREEN_WIDTH - SCREENX_OFFSET && GetPosition()->X > 0 + SCREENX_OFFSET && GetPosition()->Y < SCREEN_HEIGHT - SCREENY_OFFSET && GetPosition()->Y > 0 + SCREENY_OFFSET) {
+			ScreenWrap();
+		}
+		
+		
 	}
+
+
 }
 
 Enemy::Enemy(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect, Player* pacman) : GameObject(texture, position, srcRect) {

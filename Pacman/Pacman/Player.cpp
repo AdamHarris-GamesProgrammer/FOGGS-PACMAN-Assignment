@@ -106,8 +106,10 @@ void Player::Update(int elapsedTime, int frameCount)
 	}
 	if (powerUpActive) {
 		effectTimer -= 0.017;
-		if (effectTimer <= 0) {
+		if (effectTimer <= 0.0f) {
+			std::cout << effectTimer << std::endl;
 			effectTimer = effectDuration;
+			powerUpActive = false;
 		}
 	}
 	PollInput();
@@ -137,7 +139,7 @@ Player::Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRe
 	pacmanEatGhostSound = rl.LoadSound("Assets/Sounds/pacman_eatghost.wav");
 	pacmanExtraPacSound = rl.LoadSound("Assets/Sounds/pacman_extrapac.wav");
 	pacmanMunchSound = rl.LoadSound("Assets/Sounds/pacman_munch.wav"); //used
-
+	effectTimer = effectDuration;
 	dead = false;
 	invincible = true;
 }

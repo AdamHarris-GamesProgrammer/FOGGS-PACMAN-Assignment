@@ -14,7 +14,6 @@ class Enemy : public GameObject {
 private:
 
 
-	void GenerateValues();
 
 	bool canBeKilled = false;
 	bool dead = false;
@@ -47,6 +46,7 @@ public:
 	bool GetCanbeKilled() { return canBeKilled; }
 	void SetCanBeKilled(bool newValue) { canBeKilled = newValue; }
 
+	void GenerateValues();
 	Enemy(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect, Player* pacman);
 };
 

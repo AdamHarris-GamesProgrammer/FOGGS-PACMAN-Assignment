@@ -145,7 +145,6 @@ public:
 
 
 /* WEDNESDAY 
-Program big munchies functionality (add additional AI type to enemy for running away from player)
 make it so munchies cant overlap each other
 */
 

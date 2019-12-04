@@ -161,8 +161,9 @@ void Pacman::Update(int elapsedTime)
 
 	if (powerUpMode && !pacman->GetPowerUp()) {
 		for (auto& ghost : ghosts) {
-			ghost->GenerateValues();
+			ghost->frozen = false;
 		}
+		powerUpMode = false;
 	}
 }
 
@@ -259,8 +260,8 @@ void Pacman::PollInput()
 void Pacman::CheckGhostCollisions()
 {
 	for (auto & ghost : ghosts) {
-		if (collisionInstance.CheckCollisions(pacman, ghost)) {
-			if (!ghost->GetCanbeKilled()) {
+		if (!ghost->frozen) {
+			if (collisionInstance.CheckCollisions(pacman, ghost)) {
 				pacman->dead = true;
 				if (!deathSoundPlayed) {
 					pacman->PlaySound(pacman->pacmanMunchSound);
@@ -269,12 +270,9 @@ void Pacman::CheckGhostCollisions()
 					}
 				}
 			}
-			else {
-				ghost->ai = Enemy::AIType::Dead;
-			}
-
 		}
 	}
+	
 }
 
 void Pacman::CheckMunchieCollisions()
@@ -315,7 +313,7 @@ void Pacman::CheckBigMunchieCollisions()
 				playerScore += 100;
 				pacman->PlaySound(pacman->pacmanEatFruitSound); 
 				for (auto& ghost : ghosts) {
-					ghost->SetCanBeKilled(true);
+					ghost->frozen = true;
 				}
 			}
 		}

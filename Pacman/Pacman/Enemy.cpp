@@ -4,9 +4,9 @@
 void Enemy::GenerateValues()
 {
 	direction = rand() % 4;
-	ai = AIType::RandomDirection;
 	int num = rand() % 3;
 	ai = (AIType)num;
+	std::cout << "AI TYPE: " << ai << std::endl;
 	switch (ai)
 	{
 	case SideToSide:
@@ -29,7 +29,6 @@ void Enemy::GenerateValues()
 		break;
 
 	}
-	ScreenWrap();
 }
 
 void Enemy::ScreenWrap() {
@@ -69,12 +68,10 @@ void Enemy::Update(int elapsedTime, int frameCount)
 	float xDistanceToPlayer = mPlayer->GetPosition()->X - GetPosition()->X;
 	float yDistanceToPlayer = mPlayer->GetPosition()->Y - GetPosition()->Y;
 
-	if (canBeKilled && !dead) {
-		ai = AIType::RunAway;
-	}
+	if (!frozen) {
+		switch (ai)
+		{
 
-	switch (ai)
-	{
 	case Enemy::SideToSide: //0 = right, 1 = left, 2 = down, 3 = up
 		if (direction == 0) {
 			GetPosition()->X += speed * elapsedTime;
@@ -99,7 +96,7 @@ void Enemy::Update(int elapsedTime, int frameCount)
 
 		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; }
 		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
-		
+
 		if (xDistanceToPlayer > yDistanceToPlayer) {
 			if (GetPosition()->X < mPlayer->GetPosition()->X) {
 				mSrcRect->X = 0;
@@ -144,28 +141,11 @@ void Enemy::Update(int elapsedTime, int frameCount)
 		break;
 	default:
 		break;
-	case RunAway:
-		if (GetPosition()->X < mPlayer->GetPosition()->X) { GetPosition()->X -= speed * elapsedTime; direction = 0; }
-		else if (GetPosition()->X > mPlayer->GetPosition()->X) { GetPosition()->X += speed * elapsedTime; direction = 1; }
-
-		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; direction = 3; }
-		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; direction = 2; }
-
-		break;
-	case Dead:
-		break;
-	}
-	if (ai != AIType::RunAway) {
-		ReverseDirection();
-	}
-	else {
-		if (GetPosition()->X < SCREEN_WIDTH - SCREENX_OFFSET && GetPosition()->X > 0 + SCREENX_OFFSET && GetPosition()->Y < SCREEN_HEIGHT - SCREENY_OFFSET && GetPosition()->Y > 0 + SCREENY_OFFSET) {
-			ScreenWrap();
-		}
-		
-		
 	}
 
+	ReverseDirection();
+	}
+	
 
 }
 

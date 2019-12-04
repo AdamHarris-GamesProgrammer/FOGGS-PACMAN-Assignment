@@ -22,6 +22,7 @@
 #include "Collisions.h"
 #include <iostream>
 #include <fstream>
+#include "BigMunchie.h"
 #include "CommonOperations.h"
 
 // Reduces the amount of typing by including all classes in S2D namespace
@@ -73,12 +74,15 @@ private:
 	Player* pacman;
 	Cherry* cherry;
 	Texture2D* munchieTexture;
+	Texture2D* bigMunchieTexture;
 	Texture2D* ghostTexture;
 
 	Enemy* ghosts[GHOSTCOUNT];
 
 	std::vector<GameObject*> gameObjects;
 	Munchies* munchies[MUNCHIE_COUNT];
+
+	BigMunchie* bigMunchies[BIG_MUNCHIE_COUNT];
 
 	//Sound effects
 	SoundEffect* pacmanBeginningSound;
@@ -88,7 +92,7 @@ private:
 
 	//sound control bools
 	bool hasIntroMusicPlayed = false;
-	bool hasChompedSoundPlayed = false;
+
 	bool hasIntermissionSoundPlayed = false;
 
 	std::fstream statsFile;
@@ -98,6 +102,7 @@ private:
 	void CheckGhostCollisions();
 	void CheckMunchieCollisions();
 	void CheckCherryCollisions();
+	void CheckBigMunchieCollisions();
 
 	void SaveScore();
 	void LoadScore();
@@ -139,8 +144,7 @@ public:
 
 
 /* WEDNESDAY 
-Implement new munchies into game
-Program big munchie functionality (add additional AI type to enemy for running away from player)
+Program big munchies functionality (add additional AI type to enemy for running away from player)
 make it so munchies cant overlap each other
 */
 
@@ -148,7 +152,7 @@ make it so munchies cant overlap each other
 Create all GUI screens (Level Fail, Level Win, How to play, highscore table)
 Implement these
 Add in game states enum to control this system
-Add in a reset and reload method for the game allowing a actual end and infitite replayability
+Add in a reset and reload method for the game allowing a actual end and infinite replay ability
 (maybe add a ghost each time the map is cleared
 */
 

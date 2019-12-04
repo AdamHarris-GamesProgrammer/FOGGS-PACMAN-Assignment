@@ -81,28 +81,34 @@ void Player::PollInput()
 		movingRight = movingRight;
 		movingDown = movingDown;
 	}
-
-	if (keyboardState->IsKeyDown(S2D::Input::Keys::LEFTSHIFT)) {
-		speedMultiplier = 1.0f;
-	}
-	else if (keyboardState->IsKeyUp(S2D::Input::Keys::LEFTSHIFT)) {
-		speedMultiplier = 0.16f;
-	}
-
 }
 
 void Player::Update(int elapsedTime, int frameCount)
 {
 	if (frameCount < PREFFERRED_FPS / 2) {
 		mSrcRect->X = 32;
+		if (!hasChompedSoundPlayed) {
+			PlaySound(pacmanChompSound);
+			hasChompedSoundPlayed = true;
+		}
 	}
 	else {
 		mSrcRect->X = 0;
 	}
+	if (frameCount >= PREFFERRED_FPS) {
+		hasChompedSoundPlayed = false;
+	}
+
 	if (invincible) {
 		invincibilityTimer -= 0.017;
 		if (invincibilityTimer <= 0.0f)
 			invincible = false;
+	}
+	if (powerUpActive) {
+		effectTimer -= 0.017;
+		if (effectTimer <= 0) {
+			effectTimer = effectDuration;
+		}
 	}
 	PollInput();
 	Movement(elapsedTime);
@@ -127,13 +133,11 @@ Player::Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRe
 	speedMultiplier = 0.16f;
 
 	pacmanChompSound = rl.LoadSound("Assets/Sounds/pacman_chomp.wav"); //used
-	pacmanEatFruitSound = rl.LoadSound("Assets/Sounds/pacman_eatfruit.wav");
+	pacmanEatFruitSound = rl.LoadSound("Assets/Sounds/pacman_eatfruit.wav"); //used
 	pacmanEatGhostSound = rl.LoadSound("Assets/Sounds/pacman_eatghost.wav");
 	pacmanExtraPacSound = rl.LoadSound("Assets/Sounds/pacman_extrapac.wav");
-	pacmanMunchSound = rl.LoadSound("Assets/Sounds/pacman_munch.wav");
+	pacmanMunchSound = rl.LoadSound("Assets/Sounds/pacman_munch.wav"); //used
 
 	dead = false;
 	invincible = true;
 }
-
-

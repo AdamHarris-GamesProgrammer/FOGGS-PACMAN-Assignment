@@ -11,6 +11,9 @@
 class Player : public GameObject{
 
 	float speedMultiplier; // = 0.16f; = 1.0f when sprinting
+	float effectTimer;
+	const float effectDuration = 10.0f;
+
 	enum Direction {
 		RIGHT,
 		UP,
@@ -25,6 +28,9 @@ class Player : public GameObject{
 	bool movingUp = false;
 	bool movingDown = false;
 
+	bool hasChompedSoundPlayed = false;
+
+	bool powerUpActive = false;
 
 
 	void Movement(int elapsedTime);
@@ -34,6 +40,8 @@ public:
 	void Update(int elapsedTime, int frameCount) override;
 	void Render();
 	void PlaySound(S2D::SoundEffect* sound);
+	void SetPowerUp(bool newValue) { powerUpActive = newValue; }
+	bool GetPowerUp() { return powerUpActive; }
 	bool dead;
 	Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect);
 	

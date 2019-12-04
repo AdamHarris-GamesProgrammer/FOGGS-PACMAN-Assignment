@@ -92,6 +92,7 @@
     <ClCompile Include="Player.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BigMunchie.h" />
     <ClInclude Include="Cherry.h" />
     <ClInclude Include="Collisions.h" />
     <ClInclude Include="CommonOperations.h" />

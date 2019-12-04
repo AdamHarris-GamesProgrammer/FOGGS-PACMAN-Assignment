@@ -9,21 +9,52 @@ void Enemy::GenerateValues()
 	ai = (AIType)num;
 	switch (ai)
 	{
-	case Enemy::SideToSide:
+	case SideToSide:
 		speed = 0.25f;
 		mSrcRect->Y = 0;
 		break;
-	case Enemy::Chase:
+	case Chase:
 		speed = 0.05f;
 		mSrcRect->Y = 20;
 		break;
-	case Enemy::RandomDirection:
+	case RandomDirection:
 		speed = 0.25f;
 		mSrcRect->Y = 40;
 		break;
-	default:
+	case RunAway:
+		speed = 0.15f;
 		break;
+	case Dead:
+		speed = 0.30f;
+		break;
+
 	}
+}
+
+void Enemy::ScreenWrap() {
+	//screen edge collision system
+	if (GetPosition()->X + GetSourceRect()->Width > SCREEN_WIDTH - 32) {
+		GetPosition()->X = 32 + 0.01f;
+	}
+	else if (GetPosition()->X <= 32) {
+		GetPosition()->X = SCREEN_WIDTH - GetSourceRect()->Width - 32;
+	}
+
+	if (GetPosition()->Y + GetSourceRect()->Height > SCREEN_HEIGHT - 32) {
+		GetPosition()->Y = 64 + 0.01f;
+	}
+	else if (GetPosition()->Y <= 64) {
+		GetPosition()->Y = SCREEN_HEIGHT - GetSourceRect()->Height - 32;
+	}
+}
+
+void Enemy::ReverseDirection()
+{
+	if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - 32) direction = 1;
+	else if (GetPosition()->X <= 32) direction = 0;
+
+	if (GetPosition()->Y + GetSourceRect()->Width >= SCREEN_HEIGHT - 32) direction = 3;
+	else if (GetPosition()->Y <= 32) direction = 2;
 }
 
 void Enemy::CheckGhostCollisions()
@@ -36,6 +67,10 @@ void Enemy::Update(int elapsedTime, int frameCount)
 {
 	float xDistanceToPlayer = mPlayer->GetPosition()->X - GetPosition()->X;
 	float yDistanceToPlayer = mPlayer->GetPosition()->Y - GetPosition()->Y;
+
+	if (canBeKilled && !dead) {
+		ai = AIType::RunAway;
+	}
 
 	switch (ai)
 	{
@@ -56,23 +91,16 @@ void Enemy::Update(int elapsedTime, int frameCount)
 			GetPosition()->Y -= speed * elapsedTime;
 			mSrcRect->X = 60;
 		}
-
-		if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - 32) direction = 1;
-		else if (GetPosition()->X <= 32) direction = 0;
-
-		if (GetPosition()->Y + GetSourceRect()->Width >= SCREEN_HEIGHT - 32) direction = 3;
-		else if (GetPosition()->Y <= 32) direction = 2;
 		break;
 	case Enemy::Chase:
 		if (GetPosition()->X < mPlayer->GetPosition()->X) { GetPosition()->X += speed * elapsedTime; }
 		else if (GetPosition()->X > mPlayer->GetPosition()->X) { GetPosition()->X -= speed * elapsedTime; }
 
 		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; }
-		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) {
-			GetPosition()->Y -= speed * elapsedTime;
-		}
+		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
 
 
+		
 		if (xDistanceToPlayer > yDistanceToPlayer) {
 			if (GetPosition()->X < mPlayer->GetPosition()->X) {
 				mSrcRect->X = 0;
@@ -89,6 +117,7 @@ void Enemy::Update(int elapsedTime, int frameCount)
 				mSrcRect->X = 60;
 			}
 		}
+
 		break;
 	case Enemy::RandomDirection:
 		if (direction == 0) {
@@ -108,12 +137,6 @@ void Enemy::Update(int elapsedTime, int frameCount)
 			mSrcRect->X = 60;
 		}
 
-		if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - 32) direction = 1;
-		else if (GetPosition()->X <= 32) direction = 0;
-
-		if (GetPosition()->Y + GetSourceRect()->Width >= SCREEN_HEIGHT - 32) direction = 3;
-		else if (GetPosition()->Y <= 32) direction = 2;
-
 		switchDirectionTime -= 0.17;
 		if (switchDirectionTime <= 0) {
 			switchDirectionTime = switchDirectionTimer;
@@ -122,8 +145,22 @@ void Enemy::Update(int elapsedTime, int frameCount)
 		break;
 	default:
 		break;
-	}
+	case RunAway:
+		if (GetPosition()->X < mPlayer->GetPosition()->X) { GetPosition()->X -= speed * elapsedTime; }
+		else if (GetPosition()->X > mPlayer->GetPosition()->X) { GetPosition()->X += speed * elapsedTime; }
 
+		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
+		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; }
+		break;
+	case Dead:
+		break;
+	}
+	if (ai != AIType::RunAway) {
+		ReverseDirection();
+	}
+	else {
+		ScreenWrap();
+	}
 }
 
 Enemy::Enemy(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect, Player* pacman) : GameObject(texture, position, srcRect) {

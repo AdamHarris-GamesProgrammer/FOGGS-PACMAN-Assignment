@@ -20,7 +20,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv)
 	collisionInstance = Collisions();
 
 	statsFile = fstream("Assets/Data/Scores.txt", std::fstream::out);
-
+	states = GameStates::MAIN_MENU;
 
 	//Initialise important Game aspects
 	Audio::Initialise(); //TODO: Uncomment this to enable sounds
@@ -76,7 +76,7 @@ void Pacman::LoadContent()
 	gameObjects.push_back(cherry);
 
 	ghostTexture = rl.LoadTexture("Assets/Textures/GhostSheet.png");
-	for (auto & ghost : ghosts)
+	for (auto& ghost : ghosts)
 	{
 		ghost = new Enemy(ghostTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
 		gameObjects.push_back(ghost);
@@ -113,65 +113,94 @@ void Pacman::LoadContent()
 	uiSystem->gameGUI->scoreStringPosition = new Vector2((SCREEN_WIDTH / 4), 32);
 
 	playspaceTexture = rl.LoadTexture("Assets/Textures/Playspace.png");
-
+	
+	gameOverTexture = rl.LoadTexture("Assets/MenuScreens/GameOver.png");
+	gameWinTexture = rl.LoadTexture("Assets/MenuScreeens/GameWin.png");
+	howToPlayTexture = rl.LoadTexture("Assets/MenuScreens/HowToPlay.png");
 }
 
 void Pacman::Update(int elapsedTime)
 {
 	PollInput();
-	if (!pacman->dead) {
-		if (!isPaused || !isGameStarted) {
-			frameCount++;
-		}
-		if (!isGameStarted || isPaused) {
-			if (!hasIntermissionSoundPlayed) {
-				Audio::Play(pacmanIntermissionSound);
-				hasIntermissionSoundPlayed = true;
-			}
-		}
-		else if (isGameStarted && !hasIntroMusicPlayed) {
-			Audio::Stop(pacmanIntermissionSound);
+	switch (states) {
+	case GameStates::MAIN_MENU:
+		//TODO: Continue here
+		break;
+	case GameStates::HOW_TO_PLAY:
+
+		break;
+	case GameStates::GAME:
+		Audio::Stop(pacmanIntermissionSound);
+		if (!hasIntroMusicPlayed) {
 			Audio::Play(pacmanBeginningSound);
 			hasIntroMusicPlayed = true;
-			hasIntermissionSoundPlayed = false;
 		}
-		if (isGameStarted && !isPaused) {
-			for (int i = 0; i < MUNCHIE_COUNT; i++) {
-				if (munchies[i] != nullptr)
-					munchies[i]->Update(elapsedTime, frameCount);
-			}
+		
+		frameCount++;
 
-			for each (GameObject * object in gameObjects)
-			{
-				object->Update(elapsedTime, frameCount);
-			}
-			if (!pacman->invincible) {
-				CheckGhostCollisions();
-
-			}
-			CheckMunchieCollisions();
-			CheckCherryCollisions();
-			CheckBigMunchieCollisions();
+		for (int i = 0; i < MUNCHIE_COUNT; i++) {
+			if (munchies[i] != nullptr)
+				munchies[i]->Update(elapsedTime, frameCount);
 		}
-	}
-	if (pacman->GetPowerUp()) {
-		powerUpMode = true;
 
-	}
-
-	if (powerUpMode && !pacman->GetPowerUp()) {
-		for (auto& ghost : ghosts) {
-			ghost->frozen = false;
+		for each (GameObject * object in gameObjects)
+		{
+			object->Update(elapsedTime, frameCount);
 		}
-		powerUpMode = false;
-	}
+		if (!pacman->invincible) {
+			CheckGhostCollisions();
+
+		}
+		CheckMunchieCollisions();
+		CheckCherryCollisions();
+		CheckBigMunchieCollisions();
+
+		if (pacman->GetPowerUp()) {
+			powerUpMode = true;
+
+		}
+
+		if (powerUpMode && !pacman->GetPowerUp()) {
+			for (auto& ghost : ghosts) {
+				ghost->frozen = false;
+			}
+			powerUpMode = false;
+		}
+		break;
+	case GameStates::PAUSED:
+		if (!hasIntermissionSoundPlayed) {
+			Audio::Play(pacmanIntermissionSound);
+			hasIntermissionSoundPlayed = true;
+		}
+		break;
+	case GameStates::GAME_OVER:
+		if (!deathSoundPlayed) {
+			pacman->PlaySound(pacman->pacmanMunchSound);
+			if (pacman->pacmanMunchSound->GetState() == SoundEffectState::PLAYING) {
+				deathSoundPlayed = true;
+			}
+		}
+		break;
+	case GameStates::GAME_WIN:
+
+		break;
+
+	};
 }
 
 void Pacman::Draw(int elapsedTime)
 {
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::Draw(playspaceTexture, new Vector2(32, 32), new Rect(0.0f, 0.0f, 960, 704));
-	if (isGameStarted) {
+
+	switch (states) {
+	case GameStates::MAIN_MENU:
+		SpriteBatch::Draw(uiSystem->startMenu->startMenuLogo, uiSystem->startMenu->startMenuPosition, uiSystem->startMenu->startMenuRectangle);
+		break;
+	case GameStates::HOW_TO_PLAY:
+		SpriteBatch::Draw(howToPlayTexture, new Vector2(0, 0), new Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
+		break;
+	case GameStates::GAME:
+		SpriteBatch::Draw(playspaceTexture, new Vector2(32, 32), new Rect(0.0f, 0.0f, 960, 704));
 		for each (Munchies * munchie in munchies)
 		{
 			munchie->Render();
@@ -183,34 +212,31 @@ void Pacman::Draw(int elapsedTime)
 
 		for each (GameObject * object in gameObjects)
 		{
-			if(object != pacman)
+			if (object != pacman)
 				object->Render();
-			else{
+			else {
 				pacman->Render();
 			}
 		}
 
 
-		if (frameCount < PREFFERRED_FPS / 2)
-		{
+		if (frameCount >= PREFFERRED_FPS)
+			frameCount = 0;
 
-		}
-		else
-		{
-			if (frameCount >= PREFFERRED_FPS)
-				frameCount = 0;
 
-		}
 		DrawGUI();
-	}
-	else {
-		SpriteBatch::Draw(uiSystem->startMenu->startMenuLogo, uiSystem->startMenu->startMenuPosition, uiSystem->startMenu->startMenuRectangle);
-	}
-
-	if (isPaused) {
+		break;
+	case GameStates::PAUSED:
 		SpriteBatch::Draw(uiSystem->pauseScreen->pauseScreenBackground, uiSystem->pauseScreen->pauseScreenRectangle, nullptr);
-	}
+		break;
+	case GameStates::GAME_OVER:
+		SpriteBatch::Draw(gameOverTexture, new Vector2(0, 0), new Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
+		break;
+	case GameStates::GAME_WIN:
+		SpriteBatch::Draw(gameWinTexture, new Vector2(0, 0), new Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
+		break;
 
+	};
 	SpriteBatch::EndDraw(); // Ends Drawing
 }
 
@@ -238,41 +264,83 @@ void Pacman::PollInput()
 {
 	S2D::Input::KeyboardState* keyboardState = S2D::Input::Keyboard::GetState();
 	S2D::Input::MouseState* mouseState = S2D::Input::Mouse::GetState();
+	switch (states)
+	{
+	case Pacman::MAIN_MENU:
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
+			states = GameStates::GAME;
+		}
+		else if (keyboardState->IsKeyDown(S2D::Input::Keys::H)) {
+			states = GameStates::HOW_TO_PLAY;
+		}
 
-	if (keyboardState->IsKeyDown(S2D::Input::Keys::P) && !ispKeyDown) { //PAUSE
-		ispKeyDown = true;
-		isPaused = !isPaused;
-	}
+		if (!hasIntermissionSoundPlayed) {
+			Audio::Play(pacmanIntermissionSound);
+			hasIntermissionSoundPlayed = true;
+		}
+		break;
+	case Pacman::HOW_TO_PLAY:
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
+			states = GameStates::MAIN_MENU;
+		}
 
-	if (keyboardState->IsKeyUp(S2D::Input::Keys::P)) { //allows pause to toggle 
-		ispKeyDown = false;
+		break;
+	case Pacman::GAME:
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::P) && !ispKeyDown) { //PAUSE
+			ispKeyDown = true;
+			states = GameStates::PAUSED;
+		}
+
+		if (keyboardState->IsKeyUp(S2D::Input::Keys::P)) { //allows pause to toggle 
+			ispKeyDown = false;
+		}
+		break;
+	case Pacman::PAUSED:
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::P) && !ispKeyDown) { //PAUSE
+			ispKeyDown = true;
+			states = GameStates::GAME;
+		}
+
+		if (keyboardState->IsKeyUp(S2D::Input::Keys::P)) { //allows pause to toggle 
+			ispKeyDown = false;
+		}
+
+		Audio::Stop(pacmanIntermissionSound);
+		hasIntermissionSoundPlayed = true;
+		break;
+	case Pacman::GAME_OVER:
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::R)) {
+			states = GameStates::GAME;
+		}
+		break;
+	case Pacman::GAME_WIN:
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
+			states = GameStates::GAME;
+		}
+		break;
+	default:
+		break;
 	}
 
 	if (keyboardState->IsKeyDown(S2D::Input::Keys::ESCAPE)) { //QUIT
 		S2D::Graphics::Destroy();
 	}
 
-	if (!isGameStarted && keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
-		isGameStarted = true;
-	}
+
 }
 
 void Pacman::CheckGhostCollisions()
 {
-	for (auto & ghost : ghosts) {
+	for (auto& ghost : ghosts) {
 		if (!ghost->frozen) {
 			if (collisionInstance.CheckCollisions(pacman, ghost)) {
+				states = GameStates::GAME_OVER;
 				pacman->dead = true;
-				if (!deathSoundPlayed) {
-					pacman->PlaySound(pacman->pacmanMunchSound);
-					if (pacman->pacmanExtraPacSound->GetState() == SoundEffectState::PLAYING) {
-						deathSoundPlayed = true;
-					}
-				}
+
 			}
 		}
 	}
-	
+
 }
 
 void Pacman::CheckMunchieCollisions()
@@ -309,9 +377,9 @@ void Pacman::CheckBigMunchieCollisions()
 		if (bigMunchies[i] != nullptr) {
 			if (collisionInstance.CheckCollisions(pacman, bigMunchies[i])) {
 				pacman->SetPowerUp(true);
-				bigMunchies[i] = nullptr; 
+				bigMunchies[i] = nullptr;
 				playerScore += 100;
-				pacman->PlaySound(pacman->pacmanEatFruitSound); 
+				pacman->PlaySound(pacman->pacmanEatFruitSound);
 				for (auto& ghost : ghosts) {
 					ghost->frozen = true;
 				}

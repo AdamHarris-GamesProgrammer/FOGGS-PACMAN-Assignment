@@ -61,7 +61,16 @@ struct UI {
 class Pacman : public Game
 {
 private:
+	enum GameStates {
+		MAIN_MENU = 0,
+		HOW_TO_PLAY,
+		GAME,
+		PAUSED,
+		GAME_OVER,
+		GAME_WIN
+	};
 
+	GameStates states;
 
 	int playerScore = 0;
 	int highScore = 0;
@@ -92,7 +101,6 @@ private:
 
 	//sound control bools
 	bool hasIntroMusicPlayed = false;
-
 	bool hasIntermissionSoundPlayed = false;
 
 	std::fstream statsFile;
@@ -109,6 +117,9 @@ private:
 	void DeleteScore();
 
 	Texture2D* playspaceTexture;
+	Texture2D* howToPlayTexture;
+	Texture2D* gameWinTexture;
+	Texture2D* gameOverTexture;
 
 	CommonOperations co;
 
@@ -149,9 +160,8 @@ make it so munchies cant overlap each other
 */
 
 /* Thursday
-Create all GUI screens (Level Fail, Level Win, How to play, highscore table)
-Implement these
-Add in game states enum to control this system
+get the game to load again after resetting 
+make it so space is like a oggle switch i guess (look at the pKeydown system)
 Add in a reset and reload method for the game allowing a actual end and infinite replay ability
 (maybe add a ghost each time the map is cleared
 */

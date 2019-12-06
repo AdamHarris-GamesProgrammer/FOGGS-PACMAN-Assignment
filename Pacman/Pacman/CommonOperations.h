@@ -7,10 +7,10 @@ public:
 	{
 		int randX = rand() % 992 + 48;
 		int randY = rand() % 736 + 48;
-		if (randX >= 960) {
+		if (randX >= 944) {
 			randX -= 128;
 		}
-		if (randY >= 704) {
+		if (randY >= 688) {
 			randY -= 96;
 		}
 

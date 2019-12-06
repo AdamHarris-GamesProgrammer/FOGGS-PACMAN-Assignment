@@ -21,7 +21,6 @@
 #include "Enemy.h"
 #include "Collisions.h"
 #include <iostream>
-#include <fstream>
 #include "BigMunchie.h"
 #include "CommonOperations.h"
 
@@ -72,6 +71,7 @@ private:
 
 	GameStates states;
 
+	int remainingMunchies;
 	int playerScore = 0;
 	int highScore = 0;
 
@@ -103,18 +103,12 @@ private:
 	bool hasIntroMusicPlayed = false;
 	bool hasIntermissionSoundPlayed = false;
 
-	std::fstream statsFile;
-
 private:
 
 	void CheckGhostCollisions();
 	void CheckMunchieCollisions();
 	void CheckCherryCollisions();
 	void CheckBigMunchieCollisions();
-
-	void SaveScore();
-	void LoadScore();
-	void DeleteScore();
 
 	Texture2D* playspaceTexture;
 	Texture2D* howToPlayTexture;
@@ -145,10 +139,14 @@ public:
 
 	void PollInput();
 
+	void SpawnObjects();
+	void Respawn();
+
 	//pause and start control bools
 	bool isGameStarted = false;
 	bool isPaused = false;
 	bool ispKeyDown = false;
+	bool isSpaceKeydown = false;
 
 	bool deathSoundPlayed = false;
 	bool powerUpMode = false;
@@ -160,10 +158,8 @@ make it so munchies cant overlap each other
 */
 
 /* Thursday
-get the game to load again after resetting 
-make it so space is like a oggle switch i guess (look at the pKeydown system)
-Add in a reset and reload method for the game allowing a actual end and infinite replay ability
-(maybe add a ghost each time the map is cleared
+add help menu prompt to the main menu screen
+improve pause screen looks
 */
 
 /* FRIDAY

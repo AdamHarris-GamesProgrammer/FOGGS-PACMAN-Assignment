@@ -145,8 +145,6 @@ void Enemy::Update(int elapsedTime, int frameCount)
 
 	ReverseDirection();
 	}
-	
-
 }
 
 Enemy::Enemy(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect, Player* pacman) : GameObject(texture, position, srcRect) {

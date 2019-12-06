@@ -18,20 +18,15 @@ class Player : public GameObject{
 		RIGHT,
 		UP,
 		LEFT,
-		DOWN
+		DOWN,
+		STILL
 	};
 
 	Direction direction;
 
-	bool movingRight = false;
-	bool movingLeft = false;
-	bool movingUp = false;
-	bool movingDown = false;
-
 	bool hasChompedSoundPlayed = false;
 
 	bool powerUpActive = false;
-
 
 	void Movement(int elapsedTime);
 	void ScreenWrap();

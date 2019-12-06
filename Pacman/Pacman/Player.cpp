@@ -4,19 +4,19 @@ void Player::Movement(int elapsedTime)
 {
 	float movementSpeed = speedMultiplier * elapsedTime;
 	int directionValue = direction * 32;
-	if (movingRight) {
+	if (direction == Direction::RIGHT) {
 		mPosition->X += movementSpeed;
 		mSrcRect->Y = directionValue;
 	}
-	else if (movingLeft) {
+	else if (direction == Direction::LEFT) {
 		mPosition->X -= movementSpeed;
 		mSrcRect->Y = directionValue;
 	}
-	else if (movingUp) {
+	else if (direction == Direction::UP) {
 		mPosition->Y -= movementSpeed;
 		mSrcRect->Y = directionValue;
 	}
-	else if (movingDown) {
+	else if (direction == Direction::DOWN) {
 		mPosition->Y += movementSpeed;
 		mSrcRect->Y = directionValue;
 	}
@@ -25,62 +25,23 @@ void Player::Movement(int elapsedTime)
 void Player::ScreenWrap()
 {
 	//screen edge collision system
-	if (mPosition->X + mSrcRect->Width > SCREEN_WIDTH - 32) {
-		mPosition->X = 32 + 0.01f;
-	}
-	else if (mPosition->X <= 32) {
-		mPosition->X = SCREEN_WIDTH - mSrcRect->Width - 32;
-	}
+	if (mPosition->X + mSrcRect->Width > SCREEN_WIDTH - SCREENX_OFFSET) mPosition->X = SCREENX_OFFSET + 0.01f;
+	else if (mPosition->X <= SCREENX_OFFSET) mPosition->X = SCREEN_WIDTH - mSrcRect->Width - SCREENX_OFFSET;
 
-	if (mPosition->Y + mSrcRect->Height > SCREEN_HEIGHT - 32) {
-		mPosition->Y = 64 + 0.01f;
-	}
-	else if (mPosition->Y <= 64) {
-		mPosition->Y = SCREEN_HEIGHT - mSrcRect->Height - 32;
-	}
+	if (mPosition->Y + mSrcRect->Height > SCREEN_HEIGHT - SCREENY_OFFSET) mPosition->Y = SCREENY_OFFSET + 0.01f;
+	else if (mPosition->Y <= SCREENY_OFFSET) mPosition->Y = SCREEN_HEIGHT - mSrcRect->Height - SCREENY_OFFSET;
 }
 
 void Player::PollInput()
 {
-
 	// Gets the current state of the keyboard
 	S2D::Input::KeyboardState* keyboardState = S2D::Input::Keyboard::GetState();
 
 	//traditional pacman movement system
-	if (keyboardState->IsKeyDown(S2D::Input::Keys::W)) { //MOVE UP
-		movingUp = true;
-		movingLeft = false;
-		movingRight = false;
-		movingDown = false;
-		direction = Direction::UP;
-	}
-	else if (keyboardState->IsKeyDown(S2D::Input::Keys::A)) { //MOVE LEFT
-		movingUp = false;
-		movingLeft = true;
-		movingRight = false;
-		movingDown = false;
-		direction = Direction::LEFT;
-	}
-	else if (keyboardState->IsKeyDown(S2D::Input::Keys::S)) { //MOVE DOWN
-		movingUp = false;
-		movingLeft = false;
-		movingRight = false;
-		movingDown = true;
-		direction = Direction::DOWN;
-	}
-	else if (keyboardState->IsKeyDown(S2D::Input::Keys::D)) { //MOVE RIGHT
-		movingUp = false;
-		movingLeft = false;
-		movingRight = true;
-		movingDown = false;
-		direction = Direction::RIGHT;
-	}
-	else {
-		movingUp = movingUp;
-		movingLeft = movingLeft;
-		movingRight = movingRight;
-		movingDown = movingDown;
-	}
+	if (keyboardState->IsKeyDown(S2D::Input::Keys::W)) direction = Direction::UP;
+	else if (keyboardState->IsKeyDown(S2D::Input::Keys::A)) direction = Direction::LEFT;
+	else if (keyboardState->IsKeyDown(S2D::Input::Keys::S)) direction = Direction::DOWN;
+	else if (keyboardState->IsKeyDown(S2D::Input::Keys::D)) direction = Direction::RIGHT;
 }
 
 void Player::Update(int elapsedTime, int frameCount)
@@ -131,7 +92,7 @@ void Player::PlaySound(S2D::SoundEffect* sound)
 
 Player::Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect) : GameObject(texture,position,srcRect)
 {
-	direction = Direction::RIGHT;
+	direction = Direction::STILL;
 	speedMultiplier = 0.16f;
 
 	pacmanChompSound = rl.LoadSound("Assets/Sounds/pacman_chomp.wav"); //used

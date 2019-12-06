@@ -19,7 +19,6 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv)
 	uiSystem->gameGUI = new GameGUI();
 	collisionInstance = Collisions();
 
-	statsFile = fstream("Assets/Data/Scores.txt", std::fstream::out);
 	states = GameStates::MAIN_MENU;
 
 	//Initialise important Game aspects
@@ -43,7 +42,7 @@ Pacman::~Pacman()
 	delete[] ghosts;
 	delete munchieTexture;
 
-	//delete playspaceTexture;
+	delete playspaceTexture;
 
 	delete uiSystem->startMenu->startMenuLogo;
 	delete uiSystem->startMenu->startMenuPosition;
@@ -62,38 +61,11 @@ Pacman::~Pacman()
 	delete uiSystem;
 
 	delete pacmanBeginningSound;
-
-	statsFile.close();
 }
 
 void Pacman::LoadContent()
 {
-	pacman = new Player(rl.LoadTexture("Assets/Textures/Pacman.tga"), new S2D::Vector2(350.f, 350.0f), new S2D::Rect(0.0f, 0.0f, 32, 32));
-
-	cherry = new Cherry(rl.LoadTexture("Assets/Textures/Cherry.png"), new S2D::Vector2(300.0f, 300.0f), new S2D::Rect(0.0f, 0.0f, 32, 32));
-
-	gameObjects.push_back(pacman);
-	gameObjects.push_back(cherry);
-
-	ghostTexture = rl.LoadTexture("Assets/Textures/GhostSheet.png");
-	for (auto& ghost : ghosts)
-	{
-		ghost = new Enemy(ghostTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
-		gameObjects.push_back(ghost);
-	}
-
-	munchieTexture = rl.LoadTexture("Assets/Textures/Munchie.png");
-	// Load Munchie
-	for (int i = 0; i < MUNCHIE_COUNT; i++) {
-		munchies[i] = new Munchies(munchieTexture, co.GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 8, 8));
-	}
-
-	bigMunchieTexture = rl.LoadTexture("Assets/Textures/BigMunchie.png");
-	for (int i = 0; i < BIG_MUNCHIE_COUNT; i++) {
-		bigMunchies[i] = new BigMunchie(bigMunchieTexture, co.GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 10, 10));
-	}
-
-	LoadScore();
+	SpawnObjects();
 
 	//load menu background
 	uiSystem->pauseScreen->pauseScreenBackground = rl.LoadTexture("Assets/Textures/PacmanPauseMenu.png");
@@ -138,9 +110,9 @@ void Pacman::Update(int elapsedTime)
 		
 		frameCount++;
 
-		for (int i = 0; i < MUNCHIE_COUNT; i++) {
-			if (munchies[i] != nullptr)
-				munchies[i]->Update(elapsedTime, frameCount);
+		for (auto & munchie : munchies) {
+			if (munchie != nullptr)
+				munchie->Update(elapsedTime, frameCount);
 		}
 
 		for each (GameObject * object in gameObjects)
@@ -219,10 +191,8 @@ void Pacman::Draw(int elapsedTime)
 			}
 		}
 
-
 		if (frameCount >= PREFFERRED_FPS)
 			frameCount = 0;
-
 
 		DrawGUI();
 		break;
@@ -246,7 +216,6 @@ void Pacman::DrawGUI() {
 
 	if (playerScore >= highScore) {
 		highScore = playerScore;
-		SaveScore();
 	}
 
 	std::stringstream highScoreStream;
@@ -267,10 +236,15 @@ void Pacman::PollInput()
 	switch (states)
 	{
 	case Pacman::MAIN_MENU:
-		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE) && !isSpaceKeydown) {
+			isSpaceKeydown = true;
 			states = GameStates::GAME;
 		}
-		else if (keyboardState->IsKeyDown(S2D::Input::Keys::H)) {
+		if (keyboardState->IsKeyUp(S2D::Input::Keys::SPACE)) { //allows space bar to toggle, stops the player from leaving the help menu and spawning straight into game
+			isSpaceKeydown = false;
+		}
+		
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::H)) {
 			states = GameStates::HOW_TO_PLAY;
 		}
 
@@ -280,10 +254,14 @@ void Pacman::PollInput()
 		}
 		break;
 	case Pacman::HOW_TO_PLAY:
-		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
+		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE) && !isSpaceKeydown) {
+			isSpaceKeydown = true;
 			states = GameStates::MAIN_MENU;
 		}
 
+		if (keyboardState->IsKeyUp(S2D::Input::Keys::SPACE)) {
+			isSpaceKeydown = false;
+		}
 		break;
 	case Pacman::GAME:
 		if (keyboardState->IsKeyDown(S2D::Input::Keys::P) && !ispKeyDown) { //PAUSE
@@ -310,12 +288,14 @@ void Pacman::PollInput()
 		break;
 	case Pacman::GAME_OVER:
 		if (keyboardState->IsKeyDown(S2D::Input::Keys::R)) {
+			Respawn();
 			states = GameStates::GAME;
 		}
 		break;
 	case Pacman::GAME_WIN:
 		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE)) {
 			states = GameStates::GAME;
+			SpawnObjects();
 		}
 		break;
 	default:
@@ -325,8 +305,47 @@ void Pacman::PollInput()
 	if (keyboardState->IsKeyDown(S2D::Input::Keys::ESCAPE)) { //QUIT
 		S2D::Graphics::Destroy();
 	}
+}
+
+void Pacman::SpawnObjects()
+{
+	remainingMunchies = MUNCHIE_COUNT;
+	gameObjects.clear();
+	pacman = new Player(rl.LoadTexture("Assets/Textures/Pacman.tga"), co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 32, 32));
+
+	cherry = new Cherry(rl.LoadTexture("Assets/Textures/Cherry.png"), co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 32, 32));
+
+	gameObjects.push_back(pacman);
+	gameObjects.push_back(cherry);
+
+	ghostTexture = rl.LoadTexture("Assets/Textures/GhostSheet.png");
+	for (auto& ghost : ghosts)
+	{
+		ghost = new Enemy(ghostTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 20, 20), pacman);
+		gameObjects.push_back(ghost);
+	}
+
+	munchieTexture = rl.LoadTexture("Assets/Textures/Munchie.png");
+	// Load Munchie
+	for (auto & munchie : munchies) {
+		munchie = new Munchies(munchieTexture, co.GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 8, 8));
+	}
+
+	bigMunchieTexture = rl.LoadTexture("Assets/Textures/BigMunchie.png");
+	for (auto & bigMunchie : bigMunchies) {
+		bigMunchie = new BigMunchie(bigMunchieTexture, co.GeneratePositionWithinGameBounds(), new Rect(0.0f, 0.0f, 10, 10));
+	}
+}
 
 
+void Pacman::Respawn()
+{
+	deathSoundPlayed = false;
+	hasIntermissionSoundPlayed = false;
+	hasIntroMusicPlayed = false;
+	playerScore = 0;
+
+	SpawnObjects();
 }
 
 void Pacman::CheckGhostCollisions()
@@ -345,12 +364,16 @@ void Pacman::CheckGhostCollisions()
 
 void Pacman::CheckMunchieCollisions()
 {
-	for (int i = 0; i < MUNCHIE_COUNT; i++) {
-		if (munchies[i] != nullptr) {
-			if (collisionInstance.CheckCollisions(pacman, munchies[i])) {
+	for (auto & munchie : munchies) {
+		if (munchie != nullptr) {
+			if (collisionInstance.CheckCollisions(pacman, munchie)) {
 				playerScore += 10;
-				munchies[i] = nullptr;
+				munchie = nullptr;
 				pacman->PlaySound(pacman->pacmanEatFruitSound);
+				remainingMunchies--;
+				if (remainingMunchies <= 0) {
+					states = GameStates::GAME_WIN;
+				}
 			}
 		}
 
@@ -370,14 +393,13 @@ void Pacman::CheckCherryCollisions()
 	}
 }
 
-
 void Pacman::CheckBigMunchieCollisions()
 {
-	for (int i = 0; i < BIG_MUNCHIE_COUNT; i++) {
-		if (bigMunchies[i] != nullptr) {
-			if (collisionInstance.CheckCollisions(pacman, bigMunchies[i])) {
+	for (auto & bigMunchie : bigMunchies) {
+		if (bigMunchie != nullptr) {
+			if (collisionInstance.CheckCollisions(pacman, bigMunchie)) {
 				pacman->SetPowerUp(true);
-				bigMunchies[i] = nullptr;
+				bigMunchie = nullptr;
 				playerScore += 100;
 				pacman->PlaySound(pacman->pacmanEatFruitSound);
 				for (auto& ghost : ghosts) {
@@ -388,28 +410,4 @@ void Pacman::CheckBigMunchieCollisions()
 	}
 }
 
-void Pacman::SaveScore()
-{
-	statsFile.close();
-	statsFile.open("Assets/Data/Scores.txt", std::ifstream::out | std::ifstream::trunc);
-	statsFile << playerScore;
-}
-
-void Pacman::LoadScore()
-{
-	std::string score;
-	getline(statsFile, score);
-	if (score != "") {
-		playerScore = std::stoi(score);
-	}
-	else {
-		playerScore = 0;
-	}
-}
-
-void Pacman::DeleteScore()
-{
-	statsFile.clear();
-	statsFile << 0;
-}
 

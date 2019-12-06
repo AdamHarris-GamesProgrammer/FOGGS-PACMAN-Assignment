@@ -23,28 +23,26 @@
 #include <iostream>
 #include "BigMunchie.h"
 #include "CommonOperations.h"
-
-// Reduces the amount of typing by including all classes in S2D namespace
-using namespace S2D;
+#include "ScoreManager.h"
 
 struct PauseScreen {
 	//pause screen data
-	Texture2D* pauseScreenBackground;
-	Rect* pauseScreenRectangle;
+	S2D::Texture2D* pauseScreenBackground;
+	S2D::Rect* pauseScreenRectangle;
 };
 
 struct StartMenuScreen {
 	//start menu data
-	Texture2D* startMenuLogo;
-	Rect* startMenuRectangle;
-	Vector2* startMenuPosition;
+	S2D::Texture2D* startMenuLogo;
+	S2D::Rect* startMenuRectangle;
+	S2D::Vector2* startMenuPosition;
 };
 
 struct GameGUI {
 	//GUI Data
-	Vector2* highScoreTitleStringPosition;
-	Vector2* highScoreStringPosition;
-	Vector2* scoreStringPosition;
+	S2D::Vector2* highScoreTitleStringPosition;
+	S2D::Vector2* highScoreStringPosition;
+	S2D::Vector2* scoreStringPosition;
 };
 
 struct UI {
@@ -57,7 +55,7 @@ struct UI {
 // Declares the Pacman class which inherits from the Game class.
 // This allows us to overload the Game class methods to help us
 // load content, draw and update our game.
-class Pacman : public Game
+class Pacman : public S2D::Game
 {
 private:
 	enum GameStates {
@@ -76,15 +74,17 @@ private:
 	int highScore = 0;
 
 	ResourceLoaders rl;
+	ScoreManager scoreManager;
+
 	// Frame counter
 	int frameCount;
 
 	UI* uiSystem;
 	Player* pacman;
 	Cherry* cherry;
-	Texture2D* munchieTexture;
-	Texture2D* bigMunchieTexture;
-	Texture2D* ghostTexture;
+	S2D::Texture2D* munchieTexture;
+	S2D::Texture2D* bigMunchieTexture;
+	S2D::Texture2D* ghostTexture;
 
 	Enemy* ghosts[GHOSTCOUNT];
 
@@ -94,8 +94,8 @@ private:
 	BigMunchie* bigMunchies[BIG_MUNCHIE_COUNT];
 
 	//Sound effects
-	SoundEffect* pacmanBeginningSound;
-	SoundEffect* pacmanIntermissionSound;
+	S2D::SoundEffect* pacmanBeginningSound;
+	S2D::SoundEffect* pacmanIntermissionSound;
 
 	Collisions collisionInstance;
 
@@ -110,10 +110,10 @@ private:
 	void CheckCherryCollisions();
 	void CheckBigMunchieCollisions();
 
-	Texture2D* playspaceTexture;
-	Texture2D* howToPlayTexture;
-	Texture2D* gameWinTexture;
-	Texture2D* gameOverTexture;
+	S2D::Texture2D* playspaceTexture;
+	S2D::Texture2D* howToPlayTexture;
+	S2D::Texture2D* gameWinTexture;
+	S2D::Texture2D* gameOverTexture;
 
 	CommonOperations co;
 
@@ -126,13 +126,13 @@ public:
 	virtual ~Pacman();
 
 	/// <summary> All content should be loaded in this method. </summary>
-	void virtual LoadContent();
+	void virtual LoadContent() override;
 
 	/// <summary> Called every frame - update game logic here. </summary>
-	void virtual Update(int elapsedTime);
+	void virtual Update(int elapsedTime) override;
 
 	/// <summary> Called every frame - draw game here. </summary>
-	void virtual Draw(int elapsedTime);
+	void virtual Draw(int elapsedTime) override;
 
 	/// <summary> Draws the GUI </summary>
 	void DrawGUI();
@@ -160,10 +160,11 @@ make it so munchies cant overlap each other
 /* Thursday
 add help menu prompt to the main menu screen
 improve pause screen looks
+Add additional frames to pacman animation
+Create some form of GUI class
 */
 
 /* FRIDAY
 Ghosts can bump into each other and bounce off one another
 Implement all sounds available
-Highscore system
 */

@@ -33,28 +33,21 @@ void Enemy::GenerateValues()
 
 void Enemy::ScreenWrap() {
 	//screen edge collision system
-	if (GetPosition()->X + GetSourceRect()->Width > SCREEN_WIDTH - 32) {
-		GetPosition()->X = 32 + 0.01f;
-	}
-	else if (GetPosition()->X <= 32) {
-		GetPosition()->X = SCREEN_WIDTH - GetSourceRect()->Width - 32;
-	}
+	if (GetPosition()->X + GetSourceRect()->Width > SCREEN_WIDTH - SCREENX_OFFSET) GetPosition()->X = SCREENX_OFFSET + 0.01f;
+	else if (GetPosition()->X <= SCREENX_OFFSET) GetPosition()->X = SCREEN_WIDTH - GetSourceRect()->Width - SCREENX_OFFSET;
 
-	if (GetPosition()->Y + GetSourceRect()->Height > SCREEN_HEIGHT - 32) {
-		GetPosition()->Y = 64 + 0.01f;
-	}
-	else if (GetPosition()->Y <= 64) {
-		GetPosition()->Y = SCREEN_HEIGHT - GetSourceRect()->Height - 32;
-	}
+	if (GetPosition()->Y + GetSourceRect()->Height > SCREEN_HEIGHT - SCREENY_OFFSET) GetPosition()->Y = SCREENY_OFFSET + 0.01f;
+	else if (GetPosition()->Y <= SCREENY_OFFSET) GetPosition()->Y = SCREEN_HEIGHT - GetSourceRect()->Height - SCREENY_OFFSET;
+	
 }
 
 void Enemy::ReverseDirection()
 {
-	if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - 32) direction = 1;
-	else if (GetPosition()->X <= 32) direction = 0;
+	if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - SCREENX_OFFSET) direction = 1;
+	else if (GetPosition()->X <= SCREENX_OFFSET) direction = 0;
 
-	if (GetPosition()->Y + GetSourceRect()->Width >= SCREEN_HEIGHT - 32) direction = 3;
-	else if (GetPosition()->Y <= 32) direction = 2;
+	if (GetPosition()->Y + GetSourceRect()->Width >= SCREEN_HEIGHT - SCREENY_OFFSET) direction = 3;
+	else if (GetPosition()->Y <= SCREENY_OFFSET) direction = 2;
 }
 
 void Enemy::CheckGhostCollisions()
@@ -98,20 +91,13 @@ void Enemy::Update(int elapsedTime, int frameCount)
 		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
 
 		if (xDistanceToPlayer > yDistanceToPlayer) {
-			if (GetPosition()->X < mPlayer->GetPosition()->X) {
-				mSrcRect->X = 0;
-			}
-			else if (GetPosition()->X > mPlayer->GetPosition()->X) {
-				mSrcRect->X = 20;
-			}
+			if (GetPosition()->X < mPlayer->GetPosition()->X) mSrcRect->X = 0;			
+			else if (GetPosition()->X > mPlayer->GetPosition()->X) mSrcRect->X = 20;
+			
 		}
 		else {
-			if (GetPosition()->Y < mPlayer->GetPosition()->Y) {
-				mSrcRect->X = 40;
-			}
-			else if (GetPosition()->Y > mPlayer->GetPosition()->Y) {
-				mSrcRect->X = 60;
-			}
+			if (GetPosition()->Y < mPlayer->GetPosition()->Y) mSrcRect->X = 40;
+			else if (GetPosition()->Y > mPlayer->GetPosition()->Y) mSrcRect->X = 60;
 		}
 
 		break;

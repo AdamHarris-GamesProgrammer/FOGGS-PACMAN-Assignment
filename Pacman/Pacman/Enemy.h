@@ -12,11 +12,9 @@
 
 class Enemy : public GameObject {
 private:
-
-
-
 	void ReverseDirection();
 	void ScreenWrap();
+
 public:
 	enum AIType {
 		SideToSide = 0,

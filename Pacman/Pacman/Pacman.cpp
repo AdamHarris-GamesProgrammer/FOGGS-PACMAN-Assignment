@@ -22,7 +22,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv)
 	states = GameStates::MAIN_MENU;
 
 	//Initialise important Game aspects
-	S2D::Audio::Initialise(); //TODO: Uncomment this to enable sounds
+	//S2D::Audio::Initialise(); //TODO: Uncomment this to enable sounds
 
 	S2D::Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", PREFFERRED_FPS);
 	S2D::Input::Initialise();
@@ -192,9 +192,13 @@ void Pacman::Draw(int elapsedTime)
 				pacman->Render();
 			}
 		}
-
-		if (frameCount >= PREFFERRED_FPS)
+		if (frameCount >= 60)
 			frameCount = 0;
+
+
+		if (pacman->dead && pacman->hasDeathAnimPlayed) {
+			states = GameStates::GAME_OVER;
+		}
 
 		DrawGUI();
 		break;
@@ -358,7 +362,10 @@ void Pacman::CheckGhostCollisions()
 				if (playerScore > scoreManager.GetHighscore()) {
 					scoreManager.SaveScore(playerScore);
 				}
-				states = GameStates::GAME_OVER;
+				if (!pacman->dead) {
+					frameCount = 0;
+
+				}
 				pacman->dead = true;
 
 			}

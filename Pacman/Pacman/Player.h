@@ -38,6 +38,7 @@ public:
 	void SetPowerUp(bool newValue) { powerUpActive = newValue; }
 	bool GetPowerUp() { return powerUpActive; }
 	bool dead;
+	bool hasDeathAnimPlayed;
 	Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect);
 	
 	S2D::SoundEffect* pacmanChompSound;

@@ -160,11 +160,11 @@ make it so munchies cant overlap each other
 /* Thursday
 add help menu prompt to the main menu screen
 improve pause screen looks
-Add additional frames to pacman animation
 Create some form of GUI class
 */
 
 /* FRIDAY
 Ghosts can bump into each other and bounce off one another
 Implement all sounds available
+Leader board screen
 */

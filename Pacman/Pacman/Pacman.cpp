@@ -175,26 +175,22 @@ void Pacman::Draw(int elapsedTime)
 		break;
 	case GameStates::GAME:
 		S2D::SpriteBatch::Draw(playspaceTexture, new S2D::Vector2(32, 32), new S2D::Rect(0.0f, 0.0f, 960, 704));
-		for each (Munchies * munchie in munchies)
-		{
-			munchie->Render();
-		}
+		if (!pacman->dead) {
+			//for each (Munchies * munchie in munchies)
+			//{
+			//	munchie->Render();
+			//}
 
-		for each (BigMunchie * munchie in bigMunchies) {
-			munchie->Render();
-		}
+			//for each (BigMunchie * munchie in bigMunchies) {
+			//	munchie->Render();
+			//}
 
-		for each (GameObject * object in gameObjects)
-		{
-			if (object != pacman)
+			for each (GameObject * object in gameObjects)
+			{
 				object->Render();
-			else {
-				pacman->Render();
 			}
+			if (frameCount >= 60) frameCount = 0;
 		}
-		if (frameCount >= 60)
-			frameCount = 0;
-
 
 		if (pacman->dead && pacman->hasDeathAnimPlayed) {
 			states = GameStates::GAME_OVER;
@@ -335,11 +331,13 @@ void Pacman::SpawnObjects()
 	// Load Munchie
 	for (auto & munchie : munchies) {
 		munchie = new Munchies(munchieTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 8, 8));
+		gameObjects.push_back(munchie);
 	}
 
 	bigMunchieTexture = rl.LoadTexture("Assets/Textures/BigMunchie.png");
 	for (auto & bigMunchie : bigMunchies) {
 		bigMunchie = new BigMunchie(bigMunchieTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 10, 10));
+		gameObjects.push_back(bigMunchie);
 	}
 }
 
@@ -388,10 +386,12 @@ void Pacman::CheckMunchieCollisions()
 				}
 			}
 		}
-
 	}
 }
 
+void Pacman::CollisionCheck() {
+
+}
 
 void Pacman::CheckCherryCollisions()
 {

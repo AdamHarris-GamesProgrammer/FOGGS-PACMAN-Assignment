@@ -110,6 +110,8 @@ private:
 	void CheckCherryCollisions();
 	void CheckBigMunchieCollisions();
 
+	void CollisionCheck();
+
 	S2D::Texture2D* playspaceTexture;
 	S2D::Texture2D* howToPlayTexture;
 	S2D::Texture2D* gameWinTexture;

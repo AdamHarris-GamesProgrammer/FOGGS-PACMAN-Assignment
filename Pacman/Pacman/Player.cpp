@@ -47,21 +47,30 @@ void Player::PollInput()
 void Player::Update(int elapsedTime, int frameCount)
 {
 	if (!dead) {
-		if (frameCount < PREFFERRED_FPS / 4) {
+		if (frameCount < PREFFERRED_FPS / 8) {
 			mSrcRect->X = 0;
 			if (!hasChompedSoundPlayed) {
 				PlaySound(pacmanChompSound);
 				hasChompedSoundPlayed = true;
 			}
 		}
-		else if (frameCount < PREFFERRED_FPS / 4 * 2) {
+		else if (frameCount < PREFFERRED_FPS / 8 * 2) {
 			mSrcRect->X = 32;
 		}
-		else if (frameCount < PREFFERRED_FPS / 4 * 3) {
+		else if (frameCount < PREFFERRED_FPS / 8 * 3) {
 			mSrcRect->X = 64;
 		}
-		else if (frameCount < PREFFERRED_FPS / 4 * 4) {
+		else if (frameCount < PREFFERRED_FPS / 8 * 4) {
 			mSrcRect->X = 96;
+		}
+		else if (frameCount < PREFFERRED_FPS / 8 * 5) {
+			mSrcRect->X = 64;
+		}
+		else if (frameCount < PREFFERRED_FPS / 8 * 6) {
+			mSrcRect->X = 32;
+		}
+		else if (frameCount < PREFFERRED_FPS / 8 * 7) {
+			mSrcRect->X = 0;
 		}
 
 		if (frameCount >= PREFFERRED_FPS) {
@@ -85,43 +94,22 @@ void Player::Update(int elapsedTime, int frameCount)
 		ScreenWrap();
 	}
 	else {
-		
-		std::cout << frameCount << std::endl;
-		if (frameCount < PREFFERRED_FPS / 8) {
+		direction = Direction::STILL;
+		if (frameCount < PREFFERRED_FPS / 8) { //frame 1
 			mSrcRect->Y = 128;
 			mSrcRect->X = 0;
 		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 2) {
-			mSrcRect->Y = 128;
-			mSrcRect->X = 32;
-		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 3) {
-			mSrcRect->Y = 128;
-			mSrcRect->X = 64;
-		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 4) {
-			mSrcRect->Y = 128;
-			mSrcRect->X = 96;
-		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 5) {
+		else if (frameCount < PREFFERRED_FPS / 8 * 2) mSrcRect->X = 32; //frame 2		 
+		else if (frameCount < PREFFERRED_FPS / 8 * 3) mSrcRect->X = 64;	//frame 3
+		else if (frameCount < PREFFERRED_FPS / 8 * 4) mSrcRect->X = 96; //frame 4
+		else if (frameCount < PREFFERRED_FPS / 8 * 5) { //frame 5, switches to next row on the sprite sheet
 			mSrcRect->Y = 160;
 			mSrcRect->X = 0;
 		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 6) {
-			mSrcRect->Y = 160;
-			mSrcRect->X = 32;
-		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 7) {
-			mSrcRect->Y = 160;
-			mSrcRect->X = 64;
-		}
-		else if (frameCount < PREFFERRED_FPS / 8 * 8) {
-			mSrcRect->Y = 160;
-			mSrcRect->X = 96;
-		}
-		else {
-			hasDeathAnimPlayed = true;
-		}
+		else if (frameCount < PREFFERRED_FPS / 8 * 6) mSrcRect->X = 32; //frame 6
+		else if (frameCount < PREFFERRED_FPS / 8 * 7) mSrcRect->X = 64; //frame 7
+		else if (frameCount < PREFFERRED_FPS / 8 * 8) mSrcRect->X = 96; //frame 8
+		else hasDeathAnimPlayed = true;
 	}
 
 }
@@ -145,8 +133,7 @@ Player::Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRe
 
 	pacmanChompSound = rl.LoadSound("Assets/Sounds/pacman_chomp.wav"); //used
 	pacmanEatFruitSound = rl.LoadSound("Assets/Sounds/pacman_eatfruit.wav"); //used
-	pacmanEatGhostSound = rl.LoadSound("Assets/Sounds/pacman_eatghost.wav");
-	pacmanExtraPacSound = rl.LoadSound("Assets/Sounds/pacman_extrapac.wav");
+	pacmanExtraPacSound = rl.LoadSound("Assets/Sounds/pacman_extrapac.wav"); //used
 	pacmanMunchSound = rl.LoadSound("Assets/Sounds/pacman_munch.wav"); //used
 	effectTimer = effectDuration;
 	dead = false;

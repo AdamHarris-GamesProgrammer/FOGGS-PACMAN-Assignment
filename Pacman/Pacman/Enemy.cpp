@@ -6,7 +6,6 @@ void Enemy::GenerateValues()
 	direction = rand() % 4;
 	int num = rand() % 3;
 	ai = (AIType)num;
-	std::cout << "AI TYPE: " << ai << std::endl;
 	switch (ai)
 	{
 	case SideToSide:
@@ -50,12 +49,6 @@ void Enemy::ReverseDirection()
 	else if (GetPosition()->Y <= SCREENY_OFFSET) direction = 2;
 }
 
-void Enemy::CheckGhostCollisions()
-{
-	//TODO Make this method into a collisions class
-
-}
-
 void Enemy::Update(int elapsedTime, int frameCount)
 {
 	float xDistanceToPlayer = mPlayer->GetPosition()->X - GetPosition()->X;
@@ -84,11 +77,11 @@ void Enemy::Update(int elapsedTime, int frameCount)
 		}
 		break;
 	case Enemy::Chase:
-		if (GetPosition()->X < mPlayer->GetPosition()->X) { GetPosition()->X += speed * elapsedTime; }
-		else if (GetPosition()->X > mPlayer->GetPosition()->X) { GetPosition()->X -= speed * elapsedTime; }
+		if (GetPosition()->X < mPlayer->GetPosition()->X) GetPosition()->X += speed * elapsedTime; 
+		else if (GetPosition()->X > mPlayer->GetPosition()->X)  GetPosition()->X -= speed * elapsedTime; 
 
-		if (GetPosition()->Y < mPlayer->GetPosition()->Y) { GetPosition()->Y += speed * elapsedTime; }
-		else if (GetPosition()->Y > mPlayer->GetPosition()->Y) { GetPosition()->Y -= speed * elapsedTime; }
+		if (GetPosition()->Y < mPlayer->GetPosition()->Y)  GetPosition()->Y += speed * elapsedTime; 
+		else if (GetPosition()->Y > mPlayer->GetPosition()->Y)  GetPosition()->Y -= speed * elapsedTime; 
 
 		if (xDistanceToPlayer > yDistanceToPlayer) {
 			if (GetPosition()->X < mPlayer->GetPosition()->X) mSrcRect->X = 0;			

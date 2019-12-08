@@ -24,6 +24,7 @@
 #include "BigMunchie.h"
 #include "CommonOperations.h"
 #include "ScoreManager.h"
+#include <typeinfo>
 
 struct PauseScreen {
 	//pause screen data
@@ -104,14 +105,7 @@ private:
 	bool hasIntermissionSoundPlayed = false;
 
 private:
-
-	void CheckGhostCollisions();
-	void CheckMunchieCollisions();
-	void CheckCherryCollisions();
-	void CheckBigMunchieCollisions();
-
 	void CollisionCheck();
-
 	S2D::Texture2D* playspaceTexture;
 	S2D::Texture2D* howToPlayTexture;
 	S2D::Texture2D* gameWinTexture;
@@ -169,4 +163,6 @@ Create some form of GUI class
 Ghosts can bump into each other and bounce off one another
 Implement all sounds available
 Leader board screen
+Eat fruit sound effect
+add different sprite for cherry
 */

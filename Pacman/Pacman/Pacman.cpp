@@ -22,7 +22,7 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv)
 	states = GameStates::MAIN_MENU;
 
 	//Initialise important Game aspects
-	//S2D::Audio::Initialise(); //TODO: Uncomment this to enable sounds
+	S2D::Audio::Initialise(); //TODO: Uncomment this to enable sounds
 
 	S2D::Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", PREFFERRED_FPS);
 	S2D::Input::Initialise();
@@ -85,7 +85,7 @@ void Pacman::LoadContent()
 	uiSystem->gameGUI->scoreStringPosition = new S2D::Vector2((SCREEN_WIDTH / 4), 32);
 
 	playspaceTexture = rl.LoadTexture("Assets/Textures/Playspace.png");
-	
+
 	gameOverTexture = rl.LoadTexture("Assets/MenuScreens/GameOver.png");
 	gameWinTexture = rl.LoadTexture("Assets/MenuScreens/GameWin.png");
 	howToPlayTexture = rl.LoadTexture("Assets/MenuScreens/HowToPlay.png");
@@ -97,37 +97,23 @@ void Pacman::Update(int elapsedTime)
 {
 	PollInput();
 	switch (states) {
-	case GameStates::MAIN_MENU:
-		//TODO: Continue here
-		break;
-	case GameStates::HOW_TO_PLAY:
-
-		break;
 	case GameStates::GAME:
 		S2D::Audio::Stop(pacmanIntermissionSound);
 		if (!hasIntroMusicPlayed) {
 			S2D::Audio::Play(pacmanBeginningSound);
 			hasIntroMusicPlayed = true;
 		}
-		
-		frameCount++;
 
-		for (auto & munchie : munchies) {
-			if (munchie != nullptr)
-				munchie->Update(elapsedTime, frameCount);
-		}
+		frameCount++;
 
 		for each (GameObject * object in gameObjects)
 		{
-			object->Update(elapsedTime, frameCount);
+			if (object != nullptr) {
+				object->Update(elapsedTime, frameCount);
+			}
 		}
-		if (!pacman->invincible) {
-			CheckGhostCollisions();
 
-		}
-		CheckMunchieCollisions();
-		CheckCherryCollisions();
-		CheckBigMunchieCollisions();
+		CollisionCheck();
 
 		if (pacman->GetPowerUp()) {
 			powerUpMode = true;
@@ -155,10 +141,6 @@ void Pacman::Update(int elapsedTime)
 			}
 		}
 		break;
-	case GameStates::GAME_WIN:
-
-		break;
-
 	};
 }
 
@@ -176,20 +158,14 @@ void Pacman::Draw(int elapsedTime)
 	case GameStates::GAME:
 		S2D::SpriteBatch::Draw(playspaceTexture, new S2D::Vector2(32, 32), new S2D::Rect(0.0f, 0.0f, 960, 704));
 		if (!pacman->dead) {
-			//for each (Munchies * munchie in munchies)
-			//{
-			//	munchie->Render();
-			//}
-
-			//for each (BigMunchie * munchie in bigMunchies) {
-			//	munchie->Render();
-			//}
-
 			for each (GameObject * object in gameObjects)
 			{
 				object->Render();
 			}
 			if (frameCount >= 60) frameCount = 0;
+		}
+		else {
+			pacman->Render();
 		}
 
 		if (pacman->dead && pacman->hasDeathAnimPlayed) {
@@ -245,7 +221,7 @@ void Pacman::PollInput()
 		if (keyboardState->IsKeyUp(S2D::Input::Keys::SPACE)) { //allows space bar to toggle, stops the player from leaving the help menu and spawning straight into game
 			isSpaceKeydown = false;
 		}
-		
+
 		if (keyboardState->IsKeyDown(S2D::Input::Keys::H)) {
 			states = GameStates::HOW_TO_PLAY;
 		}
@@ -329,18 +305,17 @@ void Pacman::SpawnObjects()
 
 	munchieTexture = rl.LoadTexture("Assets/Textures/Munchie.png");
 	// Load Munchie
-	for (auto & munchie : munchies) {
+	for (auto& munchie : munchies) {
 		munchie = new Munchies(munchieTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 8, 8));
 		gameObjects.push_back(munchie);
 	}
 
 	bigMunchieTexture = rl.LoadTexture("Assets/Textures/BigMunchie.png");
-	for (auto & bigMunchie : bigMunchies) {
+	for (auto& bigMunchie : bigMunchies) {
 		bigMunchie = new BigMunchie(bigMunchieTexture, co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 10, 10));
 		gameObjects.push_back(bigMunchie);
 	}
 }
-
 
 void Pacman::Respawn()
 {
@@ -352,74 +327,56 @@ void Pacman::Respawn()
 	SpawnObjects();
 }
 
-void Pacman::CheckGhostCollisions()
-{
-	for (auto& ghost : ghosts) {
-		if (!ghost->frozen) {
-			if (collisionInstance.CheckCollisions(pacman, ghost)) {
-				if (playerScore > scoreManager.GetHighscore()) {
-					scoreManager.SaveScore(playerScore);
-				}
-				if (!pacman->dead) {
-					frameCount = 0;
-
-				}
-				pacman->dead = true;
-
-			}
-		}
-	}
-
-}
-
-void Pacman::CheckMunchieCollisions()
-{
-	for (auto & munchie : munchies) {
-		if (munchie != nullptr) {
-			if (collisionInstance.CheckCollisions(pacman, munchie)) {
-				playerScore += 10;
-				munchie = nullptr;
-				pacman->PlaySound(pacman->pacmanEatFruitSound);
-				remainingMunchies--;
-				if (remainingMunchies <= 0) {
-					states = GameStates::GAME_WIN;
-				}
-			}
-		}
-	}
-}
-
 void Pacman::CollisionCheck() {
-
-}
-
-void Pacman::CheckCherryCollisions()
-{
-	if (cherry != nullptr) {
-		if (collisionInstance.CheckCollisions(pacman, cherry)) {
-			playerScore += 100;
-			cherry->SetPosition(new S2D::Vector2(1100, 1100));
-			cherry->SetTimer = true;
-			pacman->PlaySound(pacman->pacmanEatFruitSound);
-		}
-	}
-}
-
-void Pacman::CheckBigMunchieCollisions()
-{
-	for (auto & bigMunchie : bigMunchies) {
-		if (bigMunchie != nullptr) {
-			if (collisionInstance.CheckCollisions(pacman, bigMunchie)) {
-				pacman->SetPowerUp(true);
-				bigMunchie = nullptr;
-				playerScore += 100;
-				pacman->PlaySound(pacman->pacmanEatFruitSound);
-				for (auto& ghost : ghosts) {
-					ghost->frozen = true;
+	for (auto& object : gameObjects) {
+		if (object != nullptr) {
+			const std::type_info& type_info = typeid(*object);
+			if (type_info == typeid(Enemy)) {
+				Enemy* enemy = (Enemy*)object;
+				if (!enemy->frozen && !pacman->invincible) {
+					if (collisionInstance.CheckCollisions(pacman, enemy)) {
+						if (playerScore > scoreManager.GetHighscore()) {
+							scoreManager.SaveScore(playerScore);
+						}
+						if (!pacman->dead) {
+							frameCount = 0;
+						}
+						pacman->dead = true;
+					}
+				}
+			}
+			else if (type_info == typeid(Munchies)) {
+				if (collisionInstance.CheckCollisions(pacman, (Munchies*)object)) {
+					playerScore += 10;
+					pacman->PlaySound(pacman->pacmanEatFruitSound);
+					remainingMunchies--;
+					if (remainingMunchies <= 0) {
+						pacman->PlaySound(pacman->pacmanExtraPacSound);
+						states = GameStates::GAME_WIN;
+					}
+					object = nullptr;
+				}
+			}
+			else if (type_info == typeid(BigMunchie)) {
+				if (collisionInstance.CheckCollisions(pacman, (GameObject*)object)) {
+					pacman->SetPowerUp(true);
+					object = nullptr;
+					playerScore += 100;
+					pacman->PlaySound(pacman->pacmanEatFruitSound);
+					for (auto& ghost : ghosts) {
+						ghost->frozen = true;
+					}
+				}
+			}
+			else if (type_info == typeid(Cherry)) {
+				if (collisionInstance.CheckCollisions(pacman, cherry)) {
+					playerScore += 100;
+					cherry->SetPosition(new S2D::Vector2(1100, 1100));
+					cherry->SetTimer = true;
+					pacman->PlaySound(pacman->pacmanEatFruitSound);
 				}
 			}
 		}
+
 	}
 }
-
-

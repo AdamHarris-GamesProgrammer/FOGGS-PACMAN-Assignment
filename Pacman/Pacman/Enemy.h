@@ -34,7 +34,6 @@ public:
 	float switchDirectionTime;
 	bool frozen = false;
 	AIType ai;
-	void CheckGhostCollisions();
 	void Update(int elapsedTime, int frameCount) override;
 
 
@@ -43,7 +42,3 @@ public:
 };
 
 #endif // !_ENEMY_H
-
-//TODO: chase timer going down
-//program run away ai
-//program death and respawn methods

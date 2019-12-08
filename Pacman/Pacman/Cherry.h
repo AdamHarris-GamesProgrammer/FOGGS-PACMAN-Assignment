@@ -27,7 +27,6 @@ public:
 		}
 	}
 
-
 private:
 	const float spawnTimer = 15.0f;
 	float timeToSpawn;

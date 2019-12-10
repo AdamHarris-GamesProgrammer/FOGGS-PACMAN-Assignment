@@ -23,7 +23,6 @@ GameObject::~GameObject()
 	delete mTexture;
 	delete mPosition;
 	delete mSrcRect;
-
 	delete this;
 }
 

@@ -112,6 +112,14 @@ void Player::Update(int elapsedTime, int frameCount)
 		else hasDeathAnimPlayed = true;
 	}
 
+	if (dead) {
+		if (!deathSoundPlayed) {
+			PlaySound(pacmanMunchSound);
+			if (pacmanMunchSound->GetState() == S2D::SoundEffectState::PLAYING) {
+				deathSoundPlayed = true;
+			}
+		}
+	}
 }
 
 void Player::Render()
@@ -135,8 +143,10 @@ Player::Player(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRe
 	pacmanEatFruitSound = rl.LoadSound("Assets/Sounds/pacman_eatfruit.wav"); //used
 	pacmanExtraPacSound = rl.LoadSound("Assets/Sounds/pacman_extrapac.wav"); //used
 	pacmanMunchSound = rl.LoadSound("Assets/Sounds/pacman_munch.wav"); //used
+	pacmanExtraPacSound = rl.LoadSound("Assets/Sounds/pacman_extrapac.wav");
 	effectTimer = effectDuration;
 	dead = false;
+	deathSoundPlayed = false;
 	hasDeathAnimPlayed = false;
 	invincible = true;
 }

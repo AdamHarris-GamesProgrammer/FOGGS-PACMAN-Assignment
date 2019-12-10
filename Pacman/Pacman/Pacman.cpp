@@ -9,20 +9,11 @@
 
 Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv)
 {
-	srand(time(nullptr));
-
-	frameCount = 0;
-
-	uiSystem = new UI();
-	uiSystem->startMenu = new StartMenuScreen();
-	uiSystem->pauseScreen = new PauseScreen();
-	uiSystem->gameGUI = new GameGUI();
-	collisionInstance = Collisions();
-
 	states = GameStates::MAIN_MENU;
+	gameUI = new GameGUI();
 
 	//Initialise important Game aspects
-	S2D::Audio::Initialise(); //TODO: Uncomment this to enable sounds
+	S2D::Audio::Initialise(); 
 
 	S2D::Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", PREFFERRED_FPS);
 	S2D::Input::Initialise();
@@ -33,58 +24,70 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv)
 
 Pacman::~Pacman()
 {
+	//deletes pacman
 	delete pacman;
 
+	//deletes cherry
 	delete cherry;
 
-	delete munchieTexture;
+	//deletes all munchies
+	delete[] munchies;
 
+	//deletes all big munchies
+	delete[] bigMunchies;
+
+	//deletes all ghosts
 	delete[] ghosts;
-	delete munchieTexture;
 
-	delete playspaceTexture;
+	{
+		{ //deletes game object textures
+			delete bigMunchieTexture;
+			delete ghostTexture;
+			delete munchieTexture;
+		}
+		{ //deletes menu screen textures
+			delete playspaceTexture;
+			delete howToPlayTexture;
+			delete gameWinTexture;
+			delete gameOverTexture;
+			delete startMenuLogo;
+			delete pauseScreenBackground;
+		}
+	}
 
-	delete uiSystem->startMenu->startMenuLogo;
-	delete uiSystem->startMenu->startMenuPosition;
-	delete uiSystem->startMenu->startMenuRectangle;
-	delete uiSystem->startMenu;
+	{ //deletes gameUI struct and contained objects
+		delete gameUI->highScoreStringPosition;
+		delete gameUI->highScoreTitleStringPosition;
+		delete gameUI->scoreStringPosition;
+		delete gameUI;
+	}
 
-	delete uiSystem->pauseScreen->pauseScreenBackground;
-	delete uiSystem->pauseScreen->pauseScreenRectangle;
-	delete uiSystem->pauseScreen;
+	{ //deletes sounds
+		delete pacmanBeginningSound;
+		delete pacmanIntermissionSound;
+	}
 
-	delete uiSystem->gameGUI->highScoreStringPosition;
-	delete uiSystem->gameGUI->highScoreTitleStringPosition;
-	delete uiSystem->gameGUI->scoreStringPosition;
-	delete uiSystem->gameGUI;
-
-	delete uiSystem;
-
-	delete pacmanBeginningSound;
 }
 
 void Pacman::LoadContent()
 {
 	SpawnObjects();
 
-	//load menu background
-	uiSystem->pauseScreen->pauseScreenBackground = rl.LoadTexture("Assets/Textures/PacmanPauseMenu.png");
-	uiSystem->pauseScreen->pauseScreenRectangle = new S2D::Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
+	//load pause screen background
+	pauseScreenBackground = rl.LoadTexture("Assets/MenuScreens/PacmanPauseMenu.png");
 
-	uiSystem->startMenu->startMenuLogo = rl.LoadTexture("Assets/Textures/PacmanLogo.png");
-	uiSystem->startMenu->startMenuRectangle = new S2D::Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
-	uiSystem->startMenu->startMenuPosition = new S2D::Vector2(0, 0);
+	//load main menu screen
+	startMenuLogo = rl.LoadTexture("Assets/MenuScreens/PacmanLogo.png");
+
+	//load GUI;
+	gameUI->highScoreTitleStringPosition = new S2D::Vector2((SCREEN_WIDTH / 2) - 64, 16);
+	gameUI->highScoreStringPosition = new S2D::Vector2((SCREEN_WIDTH / 2), 32);
+	gameUI->scoreStringPosition = new S2D::Vector2((SCREEN_WIDTH / 4), 32);
+	playspaceTexture = rl.LoadTexture("Assets/Textures/Playspace.png");
 
 	//load sound effects music
 	pacmanBeginningSound = rl.LoadSound("Assets/Sounds/pacman_beginning.wav"); //used
 	pacmanIntermissionSound = rl.LoadSound("Assets/Sounds/pacman_intermission.wav", true); //used
-
-	//load GUI;
-	uiSystem->gameGUI->highScoreTitleStringPosition = new S2D::Vector2((SCREEN_WIDTH / 2) - 64, 16);
-	uiSystem->gameGUI->highScoreStringPosition = new S2D::Vector2((SCREEN_WIDTH / 2), 32);
-	uiSystem->gameGUI->scoreStringPosition = new S2D::Vector2((SCREEN_WIDTH / 4), 32);
-
-	playspaceTexture = rl.LoadTexture("Assets/Textures/Playspace.png");
 
 	gameOverTexture = rl.LoadTexture("Assets/MenuScreens/GameOver.png");
 	gameWinTexture = rl.LoadTexture("Assets/MenuScreens/GameWin.png");
@@ -97,8 +100,13 @@ void Pacman::Update(int elapsedTime)
 {
 	PollInput();
 	switch (states) {
+	case GameStates::MAIN_MENU:
+		if (!hasIntermissionSoundPlayed) {
+			S2D::Audio::Play(pacmanIntermissionSound);
+			hasIntermissionSoundPlayed = true;
+		}
+		break;
 	case GameStates::GAME:
-		S2D::Audio::Stop(pacmanIntermissionSound);
 		if (!hasIntroMusicPlayed) {
 			S2D::Audio::Play(pacmanBeginningSound);
 			hasIntroMusicPlayed = true;
@@ -134,12 +142,7 @@ void Pacman::Update(int elapsedTime)
 		}
 		break;
 	case GameStates::GAME_OVER:
-		if (!deathSoundPlayed) {
-			pacman->PlaySound(pacman->pacmanMunchSound);
-			if (pacman->pacmanMunchSound->GetState() == S2D::SoundEffectState::PLAYING) {
-				deathSoundPlayed = true;
-			}
-		}
+
 		break;
 	};
 }
@@ -150,7 +153,7 @@ void Pacman::Draw(int elapsedTime)
 
 	switch (states) {
 	case GameStates::MAIN_MENU:
-		S2D::SpriteBatch::Draw(uiSystem->startMenu->startMenuLogo, uiSystem->startMenu->startMenuPosition, uiSystem->startMenu->startMenuRectangle);
+		S2D::SpriteBatch::Draw(startMenuLogo,new S2D::Vector2(0,0), new S2D::Rect(0.0f,0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
 		break;
 	case GameStates::HOW_TO_PLAY:
 		S2D::SpriteBatch::Draw(howToPlayTexture, new S2D::Vector2(0, 0), new S2D::Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -165,17 +168,17 @@ void Pacman::Draw(int elapsedTime)
 			if (frameCount >= 60) frameCount = 0;
 		}
 		else {
-			pacman->Render();
+			pacman->Render(); //just renders pacman when he is dead (displays death animation)
 		}
 
 		if (pacman->dead && pacman->hasDeathAnimPlayed) {
-			states = GameStates::GAME_OVER;
+			states = GameStates::GAME_OVER; //switches state when pacman and the death animation has played
 		}
 
 		DrawGUI();
 		break;
 	case GameStates::PAUSED:
-		S2D::SpriteBatch::Draw(uiSystem->pauseScreen->pauseScreenBackground, uiSystem->pauseScreen->pauseScreenRectangle, nullptr);
+		S2D::SpriteBatch::Draw(pauseScreenBackground,new S2D::Vector2(0,0), new S2D::Rect(0.0f,0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
 		break;
 	case GameStates::GAME_OVER:
 		S2D::SpriteBatch::Draw(gameOverTexture, new S2D::Vector2(0, 0), new S2D::Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT));
@@ -202,9 +205,9 @@ void Pacman::DrawGUI() {
 	std::stringstream scoreStream;
 	scoreStream << playerScore;
 
-	S2D::SpriteBatch::DrawString(highScoreTitleStream.str().c_str(), uiSystem->gameGUI->highScoreTitleStringPosition, S2D::Color::White);
-	S2D::SpriteBatch::DrawString(highScoreStream.str().c_str(), uiSystem->gameGUI->highScoreStringPosition, S2D::Color::White);
-	S2D::SpriteBatch::DrawString(scoreStream.str().c_str(), uiSystem->gameGUI->scoreStringPosition, S2D::Color::White);
+	S2D::SpriteBatch::DrawString(highScoreTitleStream.str().c_str(), gameUI->highScoreTitleStringPosition, S2D::Color::White);
+	S2D::SpriteBatch::DrawString(highScoreStream.str().c_str(), gameUI->highScoreStringPosition, S2D::Color::White);
+	S2D::SpriteBatch::DrawString(scoreStream.str().c_str(), gameUI->scoreStringPosition, S2D::Color::White);
 }
 
 void Pacman::PollInput()
@@ -216,7 +219,9 @@ void Pacman::PollInput()
 	case Pacman::MAIN_MENU:
 		if (keyboardState->IsKeyDown(S2D::Input::Keys::SPACE) && !isSpaceKeydown) {
 			isSpaceKeydown = true;
+			hasIntermissionSoundPlayed = false;
 			states = GameStates::GAME;
+			S2D::Audio::Stop(pacmanIntermissionSound);
 		}
 		if (keyboardState->IsKeyUp(S2D::Input::Keys::SPACE)) { //allows space bar to toggle, stops the player from leaving the help menu and spawning straight into game
 			isSpaceKeydown = false;
@@ -224,11 +229,6 @@ void Pacman::PollInput()
 
 		if (keyboardState->IsKeyDown(S2D::Input::Keys::H)) {
 			states = GameStates::HOW_TO_PLAY;
-		}
-
-		if (!hasIntermissionSoundPlayed) {
-			S2D::Audio::Play(pacmanIntermissionSound);
-			hasIntermissionSoundPlayed = true;
 		}
 		break;
 	case Pacman::HOW_TO_PLAY:
@@ -287,6 +287,15 @@ void Pacman::PollInput()
 
 void Pacman::SpawnObjects()
 {
+	srand(time(nullptr));
+
+	frameCount = 0;
+
+
+	collisionInstance = Collisions();
+
+
+
 	remainingMunchies = MUNCHIE_COUNT;
 	gameObjects.clear();
 	pacman = new Player(rl.LoadTexture("Assets/Textures/Pacman.tga"), co.GeneratePositionWithinGameBounds(), new S2D::Rect(0.0f, 0.0f, 32, 32));
@@ -373,7 +382,7 @@ void Pacman::CollisionCheck() {
 					playerScore += 100;
 					cherry->SetPosition(new S2D::Vector2(1100, 1100));
 					cherry->SetTimer = true;
-					pacman->PlaySound(pacman->pacmanEatFruitSound);
+					pacman->PlaySound(pacman->pacmanExtraPacSound);
 				}
 			}
 		}

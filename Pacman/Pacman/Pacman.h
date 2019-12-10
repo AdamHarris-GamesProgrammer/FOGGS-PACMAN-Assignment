@@ -26,18 +26,6 @@
 #include "ScoreManager.h"
 #include <typeinfo>
 
-struct PauseScreen {
-	//pause screen data
-	S2D::Texture2D* pauseScreenBackground;
-	S2D::Rect* pauseScreenRectangle;
-};
-
-struct StartMenuScreen {
-	//start menu data
-	S2D::Texture2D* startMenuLogo;
-	S2D::Rect* startMenuRectangle;
-	S2D::Vector2* startMenuPosition;
-};
 
 struct GameGUI {
 	//GUI Data
@@ -46,16 +34,7 @@ struct GameGUI {
 	S2D::Vector2* scoreStringPosition;
 };
 
-struct UI {
-	StartMenuScreen* startMenu;
-	PauseScreen* pauseScreen;
-	GameGUI* gameGUI;
 
-};
-
-// Declares the Pacman class which inherits from the Game class.
-// This allows us to overload the Game class methods to help us
-// load content, draw and update our game.
 class Pacman : public S2D::Game
 {
 private:
@@ -80,7 +59,8 @@ private:
 	// Frame counter
 	int frameCount;
 
-	UI* uiSystem;
+	GameGUI* gameUI;
+
 	Player* pacman;
 	Cherry* cherry;
 	S2D::Texture2D* munchieTexture;
@@ -110,6 +90,8 @@ private:
 	S2D::Texture2D* howToPlayTexture;
 	S2D::Texture2D* gameWinTexture;
 	S2D::Texture2D* gameOverTexture;
+	S2D::Texture2D* startMenuLogo;
+	S2D::Texture2D* pauseScreenBackground;
 
 	CommonOperations co;
 
@@ -148,21 +130,19 @@ public:
 	bool powerUpMode = false;
 };
 
-
-/* WEDNESDAY 
-make it so munchies cant overlap each other
-*/
-
-/* Thursday
+/* GRAPHICAL TODOS
 add help menu prompt to the main menu screen
 improve pause screen looks
-Create some form of GUI class
 */
 
-/* FRIDAY
+/* CODE IMPROVEMENTS
+refactor code
+comment code
+delete all pointers
+*/
+
+/* GAME MECHANICS
 Ghosts can bump into each other and bounce off one another
-Implement all sounds available
 Leader board screen
-Eat fruit sound effect
-add different sprite for cherry
+make it so munchies cant overlap each other
 */

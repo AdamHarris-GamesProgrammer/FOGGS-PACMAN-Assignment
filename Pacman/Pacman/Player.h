@@ -25,7 +25,7 @@ class Player : public GameObject{
 	Direction direction;
 
 	bool hasChompedSoundPlayed = false;
-
+	bool deathSoundPlayed = false;
 	bool powerUpActive = false;
 
 	void Movement(int elapsedTime);

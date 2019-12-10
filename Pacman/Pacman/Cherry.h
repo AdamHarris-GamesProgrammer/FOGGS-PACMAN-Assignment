@@ -12,6 +12,12 @@ public:
 
 
 	void Update(int elapsedTime, int frameCount) override {
+		if (frameCount < PREFFERRED_FPS / 2) {
+			mSrcRect->X = 0;
+		}
+		else {
+			mSrcRect->X = 32;
+		}
 		if (SetTimer) {
 			timeToSpawn = spawnTimer;
 			SetTimer = false;
@@ -19,7 +25,7 @@ public:
 
 		if (!SetTimer)
 		{
-			timeToSpawn -= 0.017;
+			timeToSpawn -= 0.017f;
 			if (timeToSpawn <= 0) {
 				timeToSpawn = spawnTimer;
 				mPosition = co.GeneratePositionWithinGameBounds();

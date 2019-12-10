@@ -2,36 +2,36 @@
 
 int ScoreManager::LoadScore()
 {
-	std::ifstream inFile("Assets/Data/Scores.txt");
-	char scoreText[8];
+	std::ifstream inFile("Assets/Data/Scores.txt"); //gets a ifstream to load the scores file
+	char scoreText[8]; ///score can be a max of 8 characters, this shouldn't be an issue as that would require hundreds of wins in a row to get.
 
-	if (!inFile) {
+	if (!inFile) { //if the file failed to open
 		std::cout << "Failed to open file" << std::endl;
 	}
 	else {
-		inFile.get(scoreText, 8);
-		if (scoreText == "") {
-			mHighscore = 0;
+		inFile.get(scoreText, 8); //gets the line
+		if (scoreText == "") { //if there is no score 
+			mHighscore = 0; //sets score to 0
 		}
 		else {
-			mHighscore = std::stoi(scoreText);
+			mHighscore = std::stoi(scoreText); //converts the line to a integer value so it can be set to mHighscore
 		}
 	}
-	inFile.close();
+	inFile.close(); //closes the file
 
-	return mHighscore;
+	return mHighscore; //returns the highscore
 }
 
-void ScoreManager::SaveScore(int newValue)
+void ScoreManager::SaveScore(int newValue) 
 {
-	std::ofstream outFile("Assets/Data/Scores.txt");
+	std::ofstream outFile("Assets/Data/Scores.txt"); //opens the scores file for writing
 
-	if (!outFile) {
-		std::cout << "Failed to open file" << std::endl;
+	if (!outFile) { //if the file failed to open
+		std::cout << "Failed to open file" << std::endl; 
 	}
 	else {
-		outFile << newValue;
+		outFile << newValue; //puts the new value into the file
 	}
 
-	outFile.close();
+	outFile.close(); //closes the file
 }

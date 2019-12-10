@@ -7,14 +7,14 @@
 
 class Munchies : public GameObject{
 public:
-	Munchies(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect) : GameObject(texture, position, srcRect){}
+	Munchies(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect) : GameObject(texture, position, srcRect){} //passes through the arguments into the base class constructor
 
-	void Update(int elapsedTime, int frameCount) override {
-		if (frameCount < PREFFERRED_FPS / 2)
+	void Update(int elapsedTime, int frameCount) override { //overrides the base class's update method
+		if (frameCount < PREFFERRED_FPS / 2) //first frame
 		{
 			mSrcRect->X = 0;
 		}
-		else
+		else //second frame
 		{
 			mSrcRect->X = 8;
 		}

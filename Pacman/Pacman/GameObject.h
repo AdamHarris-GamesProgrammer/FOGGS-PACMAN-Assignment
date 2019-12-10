@@ -7,28 +7,29 @@
 #include "CommonOperations.h"
 #include "Constants.h"
 
-class GameObject {
+class GameObject { //base class for all game objects within the game
 public:
-	GameObject(S2D::Texture2D* texture, S2D::Vector2* position);
-	GameObject(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect);
-	~GameObject();
+	GameObject(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect); //takes a texture, position and source rect
+	~GameObject(); //destructor
 
-	void Render();
-	virtual void Update(int elapsedTime, int frameCount);
+	void Render(); //renders the game object
+	virtual void Update(int elapsedTime, int frameCount); //updates the games object
 
-	S2D::Vector2* GetPosition() { return mPosition; }
-	void SetPosition(S2D::Vector2* newPosition) { mPosition = newPosition; }
+	S2D::Vector2* GetPosition() { return mPosition; } //returns the position
+	void SetPosition(S2D::Vector2* newPosition) { mPosition = newPosition; } //sets the position
 
-	S2D::Texture2D* GetTexture() { return mTexture; }
-	S2D::Rect* GetSourceRect() { return mSrcRect; }
+	S2D::Texture2D* GetTexture() { return mTexture; } //gets the texture
+	S2D::Rect* GetSourceRect() { return mSrcRect; } //gets the source rect
 
 
 
 protected:
-	S2D::Texture2D* mTexture;
+	//only derived classes can access these variables
+	S2D::Texture2D* mTexture; 
 	S2D::Vector2* mPosition;
 	S2D::Rect* mSrcRect;
 
+	//used to load resources and generate positions
 	ResourceLoaders rl;
 	CommonOperations co;
 };

@@ -3,7 +3,7 @@
 #include "S2D/S2D.h"
 class CommonOperations {
 public: 
-	S2D::Vector2* GeneratePositionWithinGameBounds()
+	S2D::Vector2* GeneratePositionWithinGameBounds() //this method generates a position within the play space where the player can reach a pickup 
 	{
 		int randX = rand() % 992 + 48;
 		int randY = rand() % 736 + 48;

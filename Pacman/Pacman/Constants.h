@@ -1,6 +1,6 @@
 #pragma once
 
-#define SCREEN_WIDTH		S2D::Graphics::GetViewportWidth()
+#define SCREEN_WIDTH		S2D::Graphics::GetViewportWidth() 
 #define SCREEN_HEIGHT		S2D::Graphics::GetViewportHeight()
 #define PREFFERRED_FPS		60
 

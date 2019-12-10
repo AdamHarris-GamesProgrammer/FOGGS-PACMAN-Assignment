@@ -3,13 +3,13 @@
 
 void Enemy::GenerateValues()
 {
-	direction = rand() % 4;
-	int num = rand() % 3;
-	ai = (AIType)num;
-	switch (ai)
+	direction = rand() % 4; //generates a direction for the ghost
+	int num = rand() % 3; //generates a number to be used for the ai type
+	ai = (AIType)num; //casts the number to AIType to load the correct ai method
+	switch (ai) //sets the src rect and the speed variable to the value for the corresponding AI type
 	{
 	case SideToSide:
-		speed = 0.25f;
+		speed = 0.25f; 
 		mSrcRect->Y = 0;
 		break;
 	case Chase:
@@ -20,29 +20,12 @@ void Enemy::GenerateValues()
 		speed = 0.25f;
 		mSrcRect->Y = 40;
 		break;
-	case RunAway:
-		speed = 0.15f;
-		break;
-	case Dead:
-		speed = 0.30f;
-		break;
-
 	}
 }
 
-void Enemy::ScreenWrap() {
-	//screen edge collision system
-	if (GetPosition()->X + GetSourceRect()->Width > SCREEN_WIDTH - SCREENX_OFFSET) GetPosition()->X = SCREENX_OFFSET + 0.01f;
-	else if (GetPosition()->X <= SCREENX_OFFSET) GetPosition()->X = SCREEN_WIDTH - GetSourceRect()->Width - SCREENX_OFFSET;
-
-	if (GetPosition()->Y + GetSourceRect()->Height > SCREEN_HEIGHT - SCREENY_OFFSET) GetPosition()->Y = SCREENY_OFFSET + 0.01f;
-	else if (GetPosition()->Y <= SCREENY_OFFSET) GetPosition()->Y = SCREEN_HEIGHT - GetSourceRect()->Height - SCREENY_OFFSET;
-	
-}
-
-void Enemy::ReverseDirection()
+void Enemy::ReverseDirection() //switches the ghosts direction when they hit the edge of the playspace
 {
-	if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - SCREENX_OFFSET) direction = 1;
+	if (GetPosition()->X + GetSourceRect()->Width >= SCREEN_WIDTH - SCREENX_OFFSET) direction = 1; 
 	else if (GetPosition()->X <= SCREENX_OFFSET) direction = 0;
 
 	if (GetPosition()->Y + GetSourceRect()->Width >= SCREEN_HEIGHT - SCREENY_OFFSET) direction = 3;
@@ -51,84 +34,83 @@ void Enemy::ReverseDirection()
 
 void Enemy::Update(int elapsedTime, int frameCount)
 {
+	//gets the distance to the player
 	float xDistanceToPlayer = mPlayer->GetPosition()->X - GetPosition()->X;
 	float yDistanceToPlayer = mPlayer->GetPosition()->Y - GetPosition()->Y;
 
-	if (!frozen) {
+	if (!frozen) { //if not frozen
 		switch (ai)
 		{
 
-	case Enemy::SideToSide: //0 = right, 1 = left, 2 = down, 3 = up
-		if (direction == 0) {
-			GetPosition()->X += speed * elapsedTime;
-			mSrcRect->X = 0;
-		}
-		else if (direction == 1) {
-			GetPosition()->X -= speed * elapsedTime;
-			mSrcRect->X = 20;
-		}
-		else if (direction == 2) {
-			GetPosition()->Y += speed * elapsedTime;
-			mSrcRect->X = 40;
-		}
-		else if (direction == 3) {
-			GetPosition()->Y -= speed * elapsedTime;
-			mSrcRect->X = 60;
-		}
-		break;
-	case Enemy::Chase:
-		if (GetPosition()->X < mPlayer->GetPosition()->X) GetPosition()->X += speed * elapsedTime; 
-		else if (GetPosition()->X > mPlayer->GetPosition()->X)  GetPosition()->X -= speed * elapsedTime; 
+		case Enemy::SideToSide: //0 = right, 1 = left, 2 = down, 3 = up
+			if (direction == 0) {
+				GetPosition()->X += speed * elapsedTime; //move right
+				mSrcRect->X = 0; //sets the sprite to look in the direction its moving
+			}
+			else if (direction == 1) {
+				GetPosition()->X -= speed * elapsedTime; //move left
+				mSrcRect->X = 20;
+			}
+			else if (direction == 2) {
+				GetPosition()->Y += speed * elapsedTime; //move down
+				mSrcRect->X = 40;
+			}
+			else if (direction == 3) {
+				GetPosition()->Y -= speed * elapsedTime; //move up
+				mSrcRect->X = 60;
+			}
+			break;
+		case Enemy::Chase:
+			if (GetPosition()->X < mPlayer->GetPosition()->X) GetPosition()->X += speed * elapsedTime; //gets the players X position and moves closer to it
+			else if (GetPosition()->X > mPlayer->GetPosition()->X)  GetPosition()->X -= speed * elapsedTime;
 
-		if (GetPosition()->Y < mPlayer->GetPosition()->Y)  GetPosition()->Y += speed * elapsedTime; 
-		else if (GetPosition()->Y > mPlayer->GetPosition()->Y)  GetPosition()->Y -= speed * elapsedTime; 
+			if (GetPosition()->Y < mPlayer->GetPosition()->Y)  GetPosition()->Y += speed * elapsedTime; //gets the players Y position and moves closer to it
+			else if (GetPosition()->Y > mPlayer->GetPosition()->Y)  GetPosition()->Y -= speed * elapsedTime;
 
-		if (xDistanceToPlayer > yDistanceToPlayer) {
-			if (GetPosition()->X < mPlayer->GetPosition()->X) mSrcRect->X = 0;			
-			else if (GetPosition()->X > mPlayer->GetPosition()->X) mSrcRect->X = 20;
-			
-		}
-		else {
-			if (GetPosition()->Y < mPlayer->GetPosition()->Y) mSrcRect->X = 40;
-			else if (GetPosition()->Y > mPlayer->GetPosition()->Y) mSrcRect->X = 60;
+			if (xDistanceToPlayer > yDistanceToPlayer) { //this block of code decides which direction sprite to use based on if the x distance to the player is greater than the y distance 
+				if (GetPosition()->X < mPlayer->GetPosition()->X) mSrcRect->X = 0;
+				else if (GetPosition()->X > mPlayer->GetPosition()->X) mSrcRect->X = 20;
+
+			}
+			else {
+				if (GetPosition()->Y < mPlayer->GetPosition()->Y) mSrcRect->X = 40;
+				else if (GetPosition()->Y > mPlayer->GetPosition()->Y) mSrcRect->X = 60;
+			}
+
+			break;
+		case Enemy::RandomDirection:
+			if (direction == 0) { //move right
+				GetPosition()->X += speed * elapsedTime;
+				mSrcRect->X = 0;
+			}
+			else if (direction == 1) { //move left
+				GetPosition()->X -= speed * elapsedTime;
+				mSrcRect->X = 20;
+			}
+			else if (direction == 2) { //move down
+				GetPosition()->Y += speed * elapsedTime;
+				mSrcRect->X = 40;
+			}
+			else if (direction == 3) { //move up
+				GetPosition()->Y -= speed * elapsedTime;
+				mSrcRect->X = 60;
+			}
+
+			//switches the ghosts direction
+			switchDirectionTime -= 0.17;
+			if (switchDirectionTime <= 0) {
+				switchDirectionTime = switchDirectionTimer;
+				direction = rand() % 4;
+			}
+			break;
 		}
 
-		break;
-	case Enemy::RandomDirection:
-		if (direction == 0) {
-			GetPosition()->X += speed * elapsedTime;
-			mSrcRect->X = 0;
-		}
-		else if (direction == 1) {
-			GetPosition()->X -= speed * elapsedTime;
-			mSrcRect->X = 20;
-		}
-		else if (direction == 2) {
-			GetPosition()->Y += speed * elapsedTime;
-			mSrcRect->X = 40;
-		}
-		else if (direction == 3) {
-			GetPosition()->Y -= speed * elapsedTime;
-			mSrcRect->X = 60;
-		}
-
-		switchDirectionTime -= 0.17;
-		if (switchDirectionTime <= 0) {
-			switchDirectionTime = switchDirectionTimer;
-			direction = rand() % 4;
-		}
-		break;
-	default:
-		break;
-	}
-
-	ReverseDirection();
+		ReverseDirection();
 	}
 }
 
-Enemy::Enemy(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect, Player* pacman) : GameObject(texture, position, srcRect) {
-	mPlayer = pacman;
-	mSrcRect = srcRect;
-	GenerateValues();
+Enemy::Enemy(S2D::Texture2D* texture, S2D::Vector2* position, S2D::Rect* srcRect, Player* pacman) : GameObject(texture, position, srcRect) { //passes parameters to the base class's constructor 
+	mPlayer = pacman; //sets the mPlayer variable equal to the pacman pointer passed through
+	GenerateValues();// generates the ghosts starting values
 
 }

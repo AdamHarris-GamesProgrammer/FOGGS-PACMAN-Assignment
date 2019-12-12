@@ -177,7 +177,13 @@ void Pacman::Draw(int elapsedTime)
 		DrawGUI();
 		break;
 	case GameStates::PAUSED:
-		S2D::SpriteBatch::Draw(pauseScreenBackground,new S2D::Vector2(0,0), new S2D::Rect(0.0f,0.0f, SCREEN_WIDTH, SCREEN_HEIGHT)); //draws the pause menu
+		S2D::SpriteBatch::Draw(playspaceTexture, new S2D::Vector2(32, 32), new S2D::Rect(0.0f, 0.0f, 960, 704)); //draws the play space texture
+		for each (GameObject * object in gameObjects) //render every object
+		{
+			object->Render();
+		}
+		S2D::SpriteBatch::Draw(pauseScreenBackground, new S2D::Vector2(0, 0), new S2D::Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT)); //draws the pause m
+
 		break;
 	case GameStates::GAME_OVER:
 		S2D::SpriteBatch::Draw(gameOverTexture, new S2D::Vector2(0, 0), new S2D::Rect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT)); //draws the game over screen
